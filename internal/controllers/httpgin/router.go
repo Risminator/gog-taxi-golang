@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/Risminator/gog-taxi-golang/internal/app"
+	"github.com/Risminator/gog-taxi-golang/internal/usecase/app"
 	"github.com/gin-gonic/gin"
 )
 

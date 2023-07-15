@@ -1,4 +1,4 @@
-package controllers
+package httpgin
 
 import (
 	"context"
@@ -11,8 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Risminator/gog-taxi-golang/internal/app"
-	"github.com/Risminator/gog-taxi-golang/internal/controllers/httpgin"
+	"github.com/Risminator/gog-taxi-golang/internal/usecase/app"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/sync/errgroup"
 )
@@ -25,7 +24,7 @@ func NewHTTPServer(port string, a app.App) *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 	handler := gin.New()
 	api := handler.Group("/api/v1")
-	httpgin.AppRouter(api, a)
+	AppRouter(api, a)
 	s := &http.Server{Addr: port, Handler: handler}
 	return s
 }

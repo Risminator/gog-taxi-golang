@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 
-	"github.com/Risminator/gog-taxi-golang/internal/controllers"
+	"github.com/Risminator/gog-taxi-golang/internal/controllers/httpgin"
 )
 
 func main() {
 	ctx := context.Background()
 	ch := make(chan int)
-	controllers.CreateServer(ctx, ch)
+	httpgin.CreateServer(ctx, ch)
 	<-ch
 }
