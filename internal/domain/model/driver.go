@@ -3,6 +3,8 @@
 package model
 
 // Should vessel id be here???
+// 1:1 vessel is not necessary
+// Business rule: Driver can not look for requests with VesselId = 0
 type Driver struct {
 	DriverId     int          `json:"driver_id"`
 	FirstName    string       `json:"first_name"`
@@ -24,8 +26,8 @@ const (
 
 // IS BAD! WHAT TO DO WITH VesselId?
 // Also add defaults to db?
-func (d *Driver) CreateDriver(id int, FirstName string, LastName string, VesselId int) Driver {
-	return Driver{id, FirstName, LastName, VesselId, Busy, 0, 0, 0}
+func (d *Driver) CreateDriver(id int, firstName string, lastName string, vesselId int) Driver {
+	return Driver{id, firstName, lastName, vesselId, Busy, 0, 0, 0}
 }
 
 func (d *Driver) SetFirstName(f string) {

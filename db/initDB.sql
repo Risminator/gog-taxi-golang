@@ -26,20 +26,6 @@ CREATE SCHEMA gog_demo;
 ALTER SCHEMA gog_demo OWNER TO postgres;
 
 --
--- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
-
-
---
--- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
-
-
---
 -- Name: driver_status; Type: TYPE; Schema: gog_demo; Owner: postgres
 --
 
@@ -53,10 +39,10 @@ CREATE TYPE gog_demo.driver_status AS ENUM (
 ALTER TYPE gog_demo.driver_status OWNER TO postgres;
 
 --
--- Name: request_status; Type: TYPE; Schema: gog_demo; Owner: postgres
+-- Name: taxi_request_status; Type: TYPE; Schema: gog_demo; Owner: postgres
 --
 
-CREATE TYPE gog_demo.request_status AS ENUM (
+CREATE TYPE gog_demo.taxi_request_status AS ENUM (
     'findingDriver',
     'waitingForDriver',
     'inProgress',
@@ -65,7 +51,14 @@ CREATE TYPE gog_demo.request_status AS ENUM (
 );
 
 
-ALTER TYPE gog_demo.request_status OWNER TO postgres;
+ALTER TYPE gog_demo.taxi_request_status OWNER TO postgres;
+
+--
+-- Name: CAST (character varying AS gog_demo.taxi_request_status); Type: CAST; Schema: -; Owner: -
+--
+
+CREATE CAST (character varying AS gog_demo.taxi_request_status) WITH INOUT AS IMPLICIT;
+
 
 SET default_tablespace = '';
 
@@ -77,7 +70,7 @@ SET default_table_access_method = heap;
 
 CREATE TABLE gog_demo.customer (
     customer_id integer NOT NULL,
-    phone integer NOT NULL,
+    phone character varying(16) NOT NULL,
     first_name character varying(100) NOT NULL,
     last_name character varying(100) NOT NULL
 );
@@ -114,10 +107,9 @@ ALTER SEQUENCE gog_demo.customer_customer_id_seq OWNED BY gog_demo.customer.cust
 CREATE TABLE gog_demo.dock (
     dock_id integer NOT NULL,
     name character varying(100) NOT NULL,
-    location public.geometry(Point,4326) NOT NULL,
-    lat double precision NOT NULL,
-    lon double precision NOT NULL,
-    working boolean NOT NULL
+    active boolean NOT NULL,
+    latitude double precision NOT NULL,
+    longitude double precision NOT NULL
 );
 
 
@@ -186,27 +178,27 @@ ALTER SEQUENCE gog_demo.driver_driver_id_seq OWNED BY gog_demo.driver.driver_id;
 
 
 --
--- Name: request; Type: TABLE; Schema: gog_demo; Owner: postgres
+-- Name: taxi_request; Type: TABLE; Schema: gog_demo; Owner: postgres
 --
 
-CREATE TABLE gog_demo.request (
-    request_id integer NOT NULL,
+CREATE TABLE gog_demo.taxi_request (
+    taxi_request_id integer NOT NULL,
     customer_id integer,
     driver_id integer,
     departure_id integer,
     destination_id integer,
     price numeric(19,4) NOT NULL,
-    status gog_demo.request_status NOT NULL
+    status gog_demo.taxi_request_status NOT NULL
 );
 
 
-ALTER TABLE gog_demo.request OWNER TO postgres;
+ALTER TABLE gog_demo.taxi_request OWNER TO postgres;
 
 --
--- Name: request_request_id_seq; Type: SEQUENCE; Schema: gog_demo; Owner: postgres
+-- Name: taxi_request_taxi_request_id_seq; Type: SEQUENCE; Schema: gog_demo; Owner: postgres
 --
 
-CREATE SEQUENCE gog_demo.request_request_id_seq
+CREATE SEQUENCE gog_demo.taxi_request_taxi_request_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -215,13 +207,13 @@ CREATE SEQUENCE gog_demo.request_request_id_seq
     CACHE 1;
 
 
-ALTER TABLE gog_demo.request_request_id_seq OWNER TO postgres;
+ALTER TABLE gog_demo.taxi_request_taxi_request_id_seq OWNER TO postgres;
 
 --
--- Name: request_request_id_seq; Type: SEQUENCE OWNED BY; Schema: gog_demo; Owner: postgres
+-- Name: taxi_request_taxi_request_id_seq; Type: SEQUENCE OWNED BY; Schema: gog_demo; Owner: postgres
 --
 
-ALTER SEQUENCE gog_demo.request_request_id_seq OWNED BY gog_demo.request.request_id;
+ALTER SEQUENCE gog_demo.taxi_request_taxi_request_id_seq OWNED BY gog_demo.taxi_request.taxi_request_id;
 
 
 --
@@ -233,9 +225,8 @@ CREATE TABLE gog_demo.vessel (
     model character varying(100) NOT NULL,
     seats integer NOT NULL,
     is_approved boolean DEFAULT false NOT NULL,
-    location public.geometry(Point,4326) NOT NULL,
-    lat double precision NOT NULL,
-    lon double precision NOT NULL
+    latitude double precision NOT NULL,
+    longitude double precision NOT NULL
 );
 
 
@@ -285,10 +276,10 @@ ALTER TABLE ONLY gog_demo.driver ALTER COLUMN driver_id SET DEFAULT nextval('gog
 
 
 --
--- Name: request request_id; Type: DEFAULT; Schema: gog_demo; Owner: postgres
+-- Name: taxi_request taxi_request_id; Type: DEFAULT; Schema: gog_demo; Owner: postgres
 --
 
-ALTER TABLE ONLY gog_demo.request ALTER COLUMN request_id SET DEFAULT nextval('gog_demo.request_request_id_seq'::regclass);
+ALTER TABLE ONLY gog_demo.taxi_request ALTER COLUMN taxi_request_id SET DEFAULT nextval('gog_demo.taxi_request_taxi_request_id_seq'::regclass);
 
 
 --
@@ -310,7 +301,7 @@ COPY gog_demo.customer (customer_id, phone, first_name, last_name) FROM stdin;
 -- Data for Name: dock; Type: TABLE DATA; Schema: gog_demo; Owner: postgres
 --
 
-COPY gog_demo.dock (dock_id, name, location, lat, lon, working) FROM stdin;
+COPY gog_demo.dock (dock_id, name, active, latitude, longitude) FROM stdin;
 \.
 
 
@@ -323,10 +314,10 @@ COPY gog_demo.driver (driver_id, first_name, last_name, vessel_id, status, balan
 
 
 --
--- Data for Name: request; Type: TABLE DATA; Schema: gog_demo; Owner: postgres
+-- Data for Name: taxi_request; Type: TABLE DATA; Schema: gog_demo; Owner: postgres
 --
 
-COPY gog_demo.request (request_id, customer_id, driver_id, departure_id, destination_id, price, status) FROM stdin;
+COPY gog_demo.taxi_request (taxi_request_id, customer_id, driver_id, departure_id, destination_id, price, status) FROM stdin;
 \.
 
 
@@ -334,15 +325,7 @@ COPY gog_demo.request (request_id, customer_id, driver_id, departure_id, destina
 -- Data for Name: vessel; Type: TABLE DATA; Schema: gog_demo; Owner: postgres
 --
 
-COPY gog_demo.vessel (vessel_id, model, seats, is_approved, location, lat, lon) FROM stdin;
-\.
-
-
---
--- Data for Name: spatial_ref_sys; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM stdin;
+COPY gog_demo.vessel (vessel_id, model, seats, is_approved, latitude, longitude) FROM stdin;
 \.
 
 
@@ -368,10 +351,10 @@ SELECT pg_catalog.setval('gog_demo.driver_driver_id_seq', 1, false);
 
 
 --
--- Name: request_request_id_seq; Type: SEQUENCE SET; Schema: gog_demo; Owner: postgres
+-- Name: taxi_request_taxi_request_id_seq; Type: SEQUENCE SET; Schema: gog_demo; Owner: postgres
 --
 
-SELECT pg_catalog.setval('gog_demo.request_request_id_seq', 1, false);
+SELECT pg_catalog.setval('gog_demo.taxi_request_taxi_request_id_seq', 1, false);
 
 
 --
@@ -398,11 +381,11 @@ ALTER TABLE ONLY gog_demo.driver
 
 
 --
--- Name: request request_pkey; Type: CONSTRAINT; Schema: gog_demo; Owner: postgres
+-- Name: taxi_request taxi_request_pkey; Type: CONSTRAINT; Schema: gog_demo; Owner: postgres
 --
 
-ALTER TABLE ONLY gog_demo.request
-    ADD CONSTRAINT request_pkey PRIMARY KEY (request_id);
+ALTER TABLE ONLY gog_demo.taxi_request
+    ADD CONSTRAINT taxi_request_pkey PRIMARY KEY (taxi_request_id);
 
 
 --
@@ -430,40 +413,38 @@ ALTER TABLE ONLY gog_demo.driver
 
 
 --
--- Name: request request_customer_id_fkey; Type: FK CONSTRAINT; Schema: gog_demo; Owner: postgres
+-- Name: taxi_request taxi_request_customer_id_fkey; Type: FK CONSTRAINT; Schema: gog_demo; Owner: postgres
 --
 
-ALTER TABLE ONLY gog_demo.request
-    ADD CONSTRAINT request_customer_id_fkey FOREIGN KEY (customer_id) REFERENCES gog_demo.customer(customer_id);
-
-
---
--- Name: request request_departure_id_fkey; Type: FK CONSTRAINT; Schema: gog_demo; Owner: postgres
---
-
-ALTER TABLE ONLY gog_demo.request
-    ADD CONSTRAINT request_departure_id_fkey FOREIGN KEY (departure_id) REFERENCES gog_demo.dock(dock_id);
+ALTER TABLE ONLY gog_demo.taxi_request
+    ADD CONSTRAINT taxi_request_customer_id_fkey FOREIGN KEY (customer_id) REFERENCES gog_demo.customer(customer_id);
 
 
 --
--- Name: request request_destination_id_fkey; Type: FK CONSTRAINT; Schema: gog_demo; Owner: postgres
+-- Name: taxi_request taxi_request_departure_id_fkey; Type: FK CONSTRAINT; Schema: gog_demo; Owner: postgres
 --
 
-ALTER TABLE ONLY gog_demo.request
-    ADD CONSTRAINT request_destination_id_fkey FOREIGN KEY (destination_id) REFERENCES gog_demo.dock(dock_id);
+ALTER TABLE ONLY gog_demo.taxi_request
+    ADD CONSTRAINT taxi_request_departure_id_fkey FOREIGN KEY (departure_id) REFERENCES gog_demo.dock(dock_id);
 
 
 --
--- Name: request request_driver_id_fkey; Type: FK CONSTRAINT; Schema: gog_demo; Owner: postgres
+-- Name: taxi_request taxi_request_destination_id_fkey; Type: FK CONSTRAINT; Schema: gog_demo; Owner: postgres
 --
 
-ALTER TABLE ONLY gog_demo.request
-    ADD CONSTRAINT request_driver_id_fkey FOREIGN KEY (driver_id) REFERENCES gog_demo.driver(driver_id);
+ALTER TABLE ONLY gog_demo.taxi_request
+    ADD CONSTRAINT taxi_request_destination_id_fkey FOREIGN KEY (destination_id) REFERENCES gog_demo.dock(dock_id);
+
+
+--
+-- Name: taxi_request taxi_request_driver_id_fkey; Type: FK CONSTRAINT; Schema: gog_demo; Owner: postgres
+--
+
+ALTER TABLE ONLY gog_demo.taxi_request
+    ADD CONSTRAINT taxi_request_driver_id_fkey FOREIGN KEY (driver_id) REFERENCES gog_demo.driver(driver_id);
 
 
 --
 -- PostgreSQL database dump complete
 --
 
--- cast for spring boot
-CREATE CAST (CHARACTER VARYING as gog_demo.request_status) WITH INOUT AS IMPLICIT;
