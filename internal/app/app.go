@@ -1,4 +1,4 @@
-package httpgin
+package app
 
 import (
 	"context"
@@ -11,7 +11,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Risminator/gog-taxi-golang/internal/usecase/app"
+	v0 "github.com/Risminator/gog-taxi-golang/internal/controllers/httpgin/v0"
+	v1 "github.com/Risminator/gog-taxi-golang/internal/controllers/httpgin/v1"
+	"github.com/Risminator/gog-taxi-golang/internal/infrastructure/datastore"
+	"github.com/Risminator/gog-taxi-golang/internal/infrastructure/repository"
+	"github.com/Risminator/gog-taxi-golang/internal/usecase"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/sync/errgroup"
 )
@@ -20,25 +24,30 @@ const (
 	httpPort = ":18080"
 )
 
-func NewHTTPServer(port string, a app.App) *http.Server {
+func NewHTTPServer(port string, a usecase.Hello, cu usecase.Customer) *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 	handler := gin.New()
-	api := handler.Group("/api/v1")
-	AppRouter(api, a)
+	api := handler.Group("/api")
+	{
+		v0.NewRouter(api, a)
+		v1.NewRouter(api, cu)
+	}
 	s := &http.Server{Addr: port, Handler: handler}
 	return s
 }
 
 func CreateServer(ctx context.Context, ch chan int) *http.Server {
-	// ToDo: add repositories
-	a := app.NewApp()
-	return CreateServerWithExternalApp(ctx, ch, a)
-}
+	db := datastore.NewDB()
 
-func CreateServerWithExternalApp(ctx context.Context, ch chan int, a app.App) *http.Server {
-	httpServer := NewHTTPServer(httpPort, a)
+	a := usecase.NewApp()
+
+	cr := repository.NewCustomerRepository(db)
+	cu := usecase.NewCustomerUsecase(cr)
+
+	httpServer := NewHTTPServer(httpPort, a, cu)
 	eg, ctx := errgroup.WithContext(ctx)
 
+	// Signals and graceful shutdown
 	sigQuit := make(chan os.Signal, 1)
 	signal.Ignore(syscall.SIGHUP, syscall.SIGPIPE)
 	signal.Notify(sigQuit, syscall.SIGINT, syscall.SIGTERM)
@@ -56,7 +65,7 @@ func CreateServerWithExternalApp(ctx context.Context, ch chan int, a app.App) *h
 
 		eg.Go(func() error {
 			log.Printf("starting http server, listening on %s\n", httpServer.Addr)
-			defer log.Printf("close http server listening on %s\n", httpServer.Addr)
+			defer log.Printf("closing http server listening on %s\n", httpServer.Addr)
 
 			errCh := make(chan error)
 
@@ -69,6 +78,12 @@ func CreateServerWithExternalApp(ctx context.Context, ch chan int, a app.App) *h
 				}
 
 				close(errCh)
+			}()
+
+			defer func() {
+				instance, _ := db.DB()
+				instance.Close()
+				log.Printf("database closed")
 			}()
 
 			go func() {
