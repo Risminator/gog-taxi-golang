@@ -5,12 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(handler *gin.RouterGroup, a usecase.Hello) {
-	handler.Use(gin.Recovery())
-	handler.Use(gin.Logger())
-
+func NewRouter(handler *gin.RouterGroup, hu usecase.Hello) {
 	h := handler.Group("/v0")
 	{
-		registerHelloRoutes(h, a)
+		registerHelloRoutes(h, hu)
 	}
 }

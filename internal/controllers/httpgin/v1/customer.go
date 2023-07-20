@@ -15,10 +15,10 @@ type customerRoutes struct {
 func registerCustomerRoutes(handler *gin.RouterGroup, cu usecase.Customer) {
 	r := &customerRoutes{cu}
 
-	h := handler.Group("/")
+	h := handler.Group("/customer")
 	{
-		h.GET("/customer", r.getAllCustomers)
-		h.GET("/customer/:id", r.getCustomerByID)
+		h.GET("/", r.getAllCustomers)
+		h.GET("/:id", r.getCustomerByID)
 	}
 }
 

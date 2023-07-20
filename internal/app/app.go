@@ -26,12 +26,20 @@ const (
 
 func NewHTTPServer(port string, a usecase.Hello, cu usecase.Customer) *http.Server {
 	gin.SetMode(gin.ReleaseMode)
+
+	// Initialize handler with logger and recovery
 	handler := gin.New()
+	handler.Use(gin.Logger())
+	handler.Use(gin.Recovery())
+
+	// Initialize api routes
+	// in future we won't use several api versions, it's just for testing purposes
 	api := handler.Group("/api")
 	{
 		v0.NewRouter(api, a)
 		v1.NewRouter(api, cu)
 	}
+
 	s := &http.Server{Addr: port, Handler: handler}
 	return s
 }
@@ -39,15 +47,15 @@ func NewHTTPServer(port string, a usecase.Hello, cu usecase.Customer) *http.Serv
 func CreateServer(ctx context.Context, ch chan int) *http.Server {
 	db := datastore.NewDB()
 
-	a := usecase.NewApp()
+	hu := usecase.NewHelloUsecase()
 
 	cr := repository.NewCustomerRepository(db)
 	cu := usecase.NewCustomerUsecase(cr)
 
-	httpServer := NewHTTPServer(httpPort, a, cu)
+	httpServer := NewHTTPServer(httpPort, hu, cu)
 	eg, ctx := errgroup.WithContext(ctx)
 
-	// Signals and graceful shutdown
+	// Signals capture and graceful shutdown
 	sigQuit := make(chan os.Signal, 1)
 	signal.Ignore(syscall.SIGHUP, syscall.SIGPIPE)
 	signal.Notify(sigQuit, syscall.SIGINT, syscall.SIGTERM)

@@ -12,6 +12,6 @@ func (a *hello) SayHello(name string) (string, error) {
 	return message, nil
 }
 
-func NewApp() Hello {
+func NewHelloUsecase() Hello {
 	return &hello{}
 }
