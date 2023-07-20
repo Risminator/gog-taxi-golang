@@ -7,11 +7,11 @@ type Hello interface {
 type hello struct {
 }
 
-func (a *hello) SayHello(name string) (string, error) {
-	message := "Hello, " + name
-	return message, nil
-}
-
 func NewHelloUsecase() Hello {
 	return &hello{}
+}
+
+func (h *hello) SayHello(name string) (string, error) {
+	message := "Hello, " + name
+	return message, nil
 }
