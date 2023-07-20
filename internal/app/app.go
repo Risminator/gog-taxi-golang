@@ -62,6 +62,7 @@ func CreateServer(ctx context.Context, ch chan int) *http.Server {
 
 	go func() {
 		eg.Go(func() error {
+			// Signal capture
 			select {
 			case s := <-sigQuit:
 				log.Printf("captured signal: %v\n", s)
@@ -77,6 +78,7 @@ func CreateServer(ctx context.Context, ch chan int) *http.Server {
 
 			errCh := make(chan error)
 
+			// Trying to shutdown the server at the end of the function
 			defer func() {
 				shCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 				defer cancel()
@@ -88,12 +90,14 @@ func CreateServer(ctx context.Context, ch chan int) *http.Server {
 				close(errCh)
 			}()
 
+			// Trying to shutdown the db at the end of the function
 			defer func() {
 				instance, _ := db.DB()
 				instance.Close()
 				log.Printf("database closed")
 			}()
 
+			// Listening on a separate goroutine
 			go func() {
 				if err := httpServer.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 					errCh <- err
@@ -108,6 +112,7 @@ func CreateServer(ctx context.Context, ch chan int) *http.Server {
 			}
 		})
 
+		// Graceful shutdown
 		if err := eg.Wait(); err != nil {
 			log.Printf("gracefully shutting down the servers: %s\n", err.Error())
 		}

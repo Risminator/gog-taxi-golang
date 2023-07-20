@@ -6,7 +6,10 @@ import (
 	"github.com/Risminator/gog-taxi-golang/internal/domain/model"
 	"github.com/Risminator/gog-taxi-golang/internal/usecase"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
+
+const customerTable = "gog_demo.customer"
 
 type customerRepository struct {
 	db *gorm.DB
@@ -18,7 +21,7 @@ func NewCustomerRepository(db *gorm.DB) usecase.CustomerRepository {
 
 func (cr *customerRepository) GetAllCustomers() ([]model.Customer, error) {
 	var customers []model.Customer
-	err := cr.db.Table("gog_demo.customer").Find(&customers).Error
+	err := cr.db.Table(customerTable).Find(&customers).Error
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -29,8 +32,35 @@ func (cr *customerRepository) GetAllCustomers() ([]model.Customer, error) {
 
 func (cr *customerRepository) GetCustomerByID(ID int) (*model.Customer, error) {
 	var customer model.Customer
-	err := cr.db.Table("gog_demo.customer").First(&customer, "customer_id = ?", ID).Error
+	err := cr.db.Table(customerTable).First(&customer, "customer_id = ?", ID).Error
+	if err != nil {
+		return nil, err
+	}
 
+	return &customer, nil
+}
+
+func (cr *customerRepository) CreateCustomer(customer *model.Customer) error {
+	err := cr.db.Table(customerTable).Select("phone", "first_name", "last_name").Create(customer).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (cr *customerRepository) UpdateCustomer(customer *model.Customer) error {
+	err := cr.db.Clauses(clause.Returning{}).Table(customerTable).Updates(&customer).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (cr *customerRepository) DeleteCustomer(ID int) (*model.Customer, error) {
+	var customer model.Customer
+	err := cr.db.Clauses(clause.Returning{}).Table(customerTable).Delete(&customer, ID).Error
 	if err != nil {
 		return nil, err
 	}
