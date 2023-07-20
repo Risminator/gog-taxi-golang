@@ -24,7 +24,7 @@ const (
 	httpPort = ":18080"
 )
 
-func NewHTTPServer(port string, a usecase.Hello, cu usecase.Customer) *http.Server {
+func NewHTTPServer(port string, hu usecase.Hello, cu usecase.Customer) *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 
 	// Initialize handler with logger and recovery
@@ -36,7 +36,7 @@ func NewHTTPServer(port string, a usecase.Hello, cu usecase.Customer) *http.Serv
 	// in future we won't use several api versions, it's just for testing purposes
 	api := handler.Group("/api")
 	{
-		v0.NewRouter(api, a)
+		v0.NewRouter(api, hu)
 		v1.NewRouter(api, cu)
 	}
 
