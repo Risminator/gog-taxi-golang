@@ -1,7 +1,7 @@
 package model
 
 type TaxiRequest struct {
-	TaxiRequestId int               `json:"request_id"`
+	TaxiRequestId int               `json:"taxi_request_id" gorm:"primaryKey"`
 	ClientId      int               `json:"client_id"`
 	DriverId      int               `json:"driver_id"`
 	DepartureId   int               `json:"departure_id"`

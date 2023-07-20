@@ -1,7 +1,7 @@
 package model
 
 type Vessel struct {
-	VesselId   int     `json:"vessel_id"`
+	VesselId   int     `json:"vessel_id" gorm:"primaryKey"`
 	Model      string  `json:"model"`
 	Seats      int     `json:"seats"`
 	IsApproved bool    `json:"is_approved"`
