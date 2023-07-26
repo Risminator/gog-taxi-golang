@@ -8,7 +8,7 @@ type Dock struct {
 	Longitude float64 `json:"longitude"`
 }
 
-func (d *Dock) CreateDock(id int, name string, active bool, lat float64, lon float64) Dock {
+func CreateDock(id int, name string, active bool, lat float64, lon float64) Dock {
 	return Dock{id, name, active, lat, lon}
 }
 
