@@ -6,7 +6,7 @@ import (
 	"github.com/Risminator/gog-taxi-golang/internal/domain/model"
 	"github.com/Risminator/gog-taxi-golang/internal/usecase"
 	"gorm.io/gorm"
-	// "gorm.io/gorm/clause"
+	"gorm.io/gorm/clause"
 )
 
 const tableName = "gog_demo.dock"
@@ -21,7 +21,7 @@ func NewDockRepository(db *gorm.DB) usecase.DockRepository {
 
 // CreateDock implements usecase.DockRepository.
 func (repo *dockRepository) CreateDock(dock *model.Dock) error {
-	err := repo.db.Table(tableName).Select("name", "latitude", "longitude").Create(dock).Error
+	err := repo.db.Clauses(clause.Returning{}).Table(tableName).Select("name", "latitude", "longitude").Create(&dock).Error
 	if err != nil {
 		return err
 	}
