@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-const tableName = "gog_demo.dock"
+const dockTableName = "gog_demo.dock"
 
 type dockRepository struct {
 	db *gorm.DB
@@ -21,7 +21,7 @@ func NewDockRepository(db *gorm.DB) usecase.DockRepository {
 
 // CreateDock implements usecase.DockRepository.
 func (repo *dockRepository) CreateDock(dock *model.Dock) error {
-	err := repo.db.Clauses(clause.Returning{}).Table(tableName).Select("name", "latitude", "longitude").Create(&dock).Error
+	err := repo.db.Clauses(clause.Returning{}).Table(dockTableName).Select("name", "latitude", "longitude").Create(&dock).Error
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (repo *dockRepository) CreateDock(dock *model.Dock) error {
 // GetDockById implements usecase.DockRepository.
 func (repo *dockRepository) GetDockById(id int) (*model.Dock, error) {
 	var dock *model.Dock
-	err := repo.db.Table(tableName).Find(&dock, "dock_id = ?", id).Error
+	err := repo.db.Table(dockTableName).Find(&dock, "dock_id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (repo *dockRepository) GetDockById(id int) (*model.Dock, error) {
 // GetDocks implements usecase.DockRepository.
 func (repo *dockRepository) GetDocks() ([]model.Dock, error) {
 	var docks []model.Dock
-	err := repo.db.Table(tableName).Find(&docks).Error
+	err := repo.db.Table(dockTableName).Find(&docks).Error
 	if err != nil {
 		return nil, err
 	}
