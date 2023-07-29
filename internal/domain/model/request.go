@@ -10,18 +10,34 @@ type TaxiRequest struct {
 	Status        TaxiRequestStatus `json:"status"`
 }
 
-type TaxiRequestStatus uint
+type TaxiRequestStatus string
 
 const (
-	FindingDriver TaxiRequestStatus = iota
-	WaitingForDriver
-	InProgress
-	Completed
-	Canceled
+	FindingDriver    TaxiRequestStatus = "FindingDriver"
+	WaitingForDriver TaxiRequestStatus = "WaitingForDriver"
+	InProgress       TaxiRequestStatus = "InProgress"
+	Completed        TaxiRequestStatus = "Completed"
+	Canceled         TaxiRequestStatus = "Canceled"
 )
 
+func ParseTaxiRequestStatus(str string) TaxiRequestStatus {
+	switch str {
+	case "FindingDriver":
+		return FindingDriver
+	case "WaitingForDriver":
+		return WaitingForDriver
+	case "InProgress":
+		return InProgress
+	case "Completed":
+		return Completed
+	case "Canceled":
+		return Canceled
+	}
+	panic("Could not parse string '" + str + "' to TaxiRequestStatus")
+}
+
 // Automatically set to FindingDriver when creating an order
-func (r *TaxiRequest) CreateTaxiRequest(reqId, clId, drId, depId, destId int, price float64) TaxiRequest {
+func CreateTaxiRequest(reqId, clId, drId, depId, destId int, price float64) TaxiRequest {
 	return TaxiRequest{reqId, clId, drId, depId, destId, price, FindingDriver}
 }
 
