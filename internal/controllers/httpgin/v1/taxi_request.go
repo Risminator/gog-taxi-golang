@@ -19,7 +19,7 @@ func registerTaxiRequestRoutes(r *gin.RouterGroup, taxiUsecase usecase.TaxiReque
 	h := r.Group("/taxi-request")
 	{
 		h.GET("/:id", routes.getRequestById)
-		h.GET("status/:status", routes.getRequestsByStatus)
+		h.GET("/status/:status", routes.getRequestsByStatus)
 		h.POST("/", routes.createRequest)
 	}
 }

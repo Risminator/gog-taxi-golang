@@ -9,9 +9,9 @@ import (
 )
 
 type dockInput struct {
-	Name      string  `json:"name"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+	Name      string  `json:"name" binding:"required"`
+	Latitude  float64 `json:"latitude" binding:"required"`
+	Longitude float64 `json:"longitude" binding:"required"`
 }
 
 func registerDockRoutes(r *gin.RouterGroup, du usecase.Dock) {
