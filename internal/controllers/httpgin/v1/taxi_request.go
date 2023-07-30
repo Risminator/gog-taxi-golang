@@ -20,7 +20,7 @@ func registerTaxiRequestRoutes(r *gin.RouterGroup, taxiUsecase usecase.TaxiReque
 	{
 		h.GET("/:id", routes.getRequestById)
 		h.GET("status/:status", routes.getRequestsByStatus)
-		h.POST("/add", routes.createRequest)
+		h.POST("/", routes.createRequest)
 	}
 }
 
