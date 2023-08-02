@@ -9,12 +9,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type taxiRequestRoutes struct {
-	taxiUsecase usecase.TaxiRequest
+type TaxiRequestWsGateway interface {
+	SendNewTaxiRequest(req model.TaxiRequest) error
+	ConnectWebsocket(w http.ResponseWriter, r *http.Request, u *model.User)
 }
 
-func registerTaxiRequestRoutes(r *gin.RouterGroup, taxiUsecase usecase.TaxiRequest) {
-	routes := &taxiRequestRoutes{taxiUsecase}
+type taxiRequestRoutes struct {
+	taxiUsecase    usecase.TaxiRequest
+	taxiWebsockets TaxiRequestWsGateway
+}
+
+func registerTaxiRequestRoutes(r *gin.RouterGroup, taxiUsecase usecase.TaxiRequest, taxiWebsockets TaxiRequestWsGateway) {
+	routes := &taxiRequestRoutes{taxiUsecase, taxiWebsockets}
 
 	h := r.Group("/taxi-request")
 	{
@@ -40,7 +46,10 @@ func (r *taxiRequestRoutes) getRequestById(c *gin.Context) {
 }
 
 func (r *taxiRequestRoutes) getRequestsByStatus(c *gin.Context) {
-	status := model.ParseTaxiRequestStatus(c.Param("status"))
+	status, err := model.TaxiRequestStatusFromString(c.Param("status"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+	}
 
 	msg, err := r.taxiUsecase.GetRequestsByStatus(status)
 	if err != nil {
@@ -62,5 +71,6 @@ func (r *taxiRequestRoutes) createRequest(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+	// TODO: add websocket functions
 	c.JSON(http.StatusOK, msg)
 }
