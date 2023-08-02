@@ -1,5 +1,7 @@
 package model
 
+import "errors"
+
 type TaxiRequest struct {
 	TaxiRequestId int               `json:"taxi_request_id" gorm:"primaryKey"`
 	ClientId      int               `json:"client_id"`
@@ -10,30 +12,38 @@ type TaxiRequest struct {
 	Status        TaxiRequestStatus `json:"status"`
 }
 
-type TaxiRequestStatus string
+type TaxiRequestStatus struct {
+	slug string
+}
 
-const (
-	FindingDriver    TaxiRequestStatus = "FindingDriver"
-	WaitingForDriver TaxiRequestStatus = "WaitingForDriver"
-	InProgress       TaxiRequestStatus = "InProgress"
-	Completed        TaxiRequestStatus = "Completed"
-	Canceled         TaxiRequestStatus = "Canceled"
+func (r TaxiRequestStatus) String() string {
+	return r.slug
+}
+
+var (
+	UnknownStatus    = TaxiRequestStatus{""}
+	FindingDriver    = TaxiRequestStatus{"findingDriver"}
+	WaitingForDriver = TaxiRequestStatus{"waitingForDriver"}
+	InProgress       = TaxiRequestStatus{"inProgress"}
+	Completed        = TaxiRequestStatus{"completed"}
+	Canceled         = TaxiRequestStatus{"canceled"}
 )
 
-func ParseTaxiRequestStatus(str string) TaxiRequestStatus {
-	switch str {
-	case "FindingDriver":
-		return FindingDriver
-	case "WaitingForDriver":
-		return WaitingForDriver
-	case "InProgress":
-		return InProgress
-	case "Completed":
-		return Completed
-	case "Canceled":
-		return Canceled
+func TaxiRequestStatusFromString(s string) (TaxiRequestStatus, error) {
+	switch s {
+	case FindingDriver.slug:
+		return FindingDriver, nil
+	case WaitingForDriver.slug:
+		return WaitingForDriver, nil
+	case InProgress.slug:
+		return InProgress, nil
+	case Completed.slug:
+		return Completed, nil
+	case Canceled.slug:
+		return Canceled, nil
 	}
-	panic("Could not parse string '" + str + "' to TaxiRequestStatus")
+
+	return UnknownStatus, errors.New("unknown TaxiRequestStatus: " + s)
 }
 
 // Automatically set to FindingDriver when creating an order
