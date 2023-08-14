@@ -7,25 +7,23 @@ type User struct {
 	Role   UserRole
 }
 
-type UserRole struct {
-	slug string
-}
+type UserRole string
 
-func (r UserRole) String() string {
-	return r.slug
-}
-
-var (
-	UnknownRole  = UserRole{""}
-	CustomerRole = UserRole{"customer"}
-	DriverRole   = UserRole{"driver"}
+const (
+	UnknownRole  UserRole = ""
+	CustomerRole UserRole = "customer"
+	DriverRole   UserRole = "driver"
 )
+
+func NewUser(id int, role UserRole) User {
+	return User{id, role}
+}
 
 func UserRoleFromString(s string) (UserRole, error) {
 	switch s {
-	case CustomerRole.slug:
+	case "customer":
 		return CustomerRole, nil
-	case DriverRole.slug:
+	case "driver":
 		return DriverRole, nil
 	}
 
