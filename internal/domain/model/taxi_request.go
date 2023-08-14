@@ -1,10 +1,12 @@
 package model
 
-import "errors"
+import (
+	"errors"
+)
 
 type TaxiRequest struct {
 	TaxiRequestId int               `json:"taxi_request_id" gorm:"primaryKey"`
-	ClientId      int               `json:"client_id"`
+	CustomerId    int               `json:"customer_id"`
 	DriverId      int               `json:"driver_id"`
 	DepartureId   int               `json:"departure_id"`
 	DestinationId int               `json:"destination_id"`
@@ -12,38 +14,32 @@ type TaxiRequest struct {
 	Status        TaxiRequestStatus `json:"status"`
 }
 
-type TaxiRequestStatus struct {
-	slug string
-}
+type TaxiRequestStatus string
 
-func (r TaxiRequestStatus) String() string {
-	return r.slug
-}
-
-var (
-	UnknownStatus    = TaxiRequestStatus{""}
-	FindingDriver    = TaxiRequestStatus{"findingDriver"}
-	WaitingForDriver = TaxiRequestStatus{"waitingForDriver"}
-	InProgress       = TaxiRequestStatus{"inProgress"}
-	Completed        = TaxiRequestStatus{"completed"}
-	Canceled         = TaxiRequestStatus{"canceled"}
+const (
+	UnknownTaxiRequestStatus TaxiRequestStatus = ""
+	FindingDriver            TaxiRequestStatus = "findingDriver"
+	WaitingForDriver         TaxiRequestStatus = "waitingForDriver"
+	InProgress               TaxiRequestStatus = "inProgress"
+	Completed                TaxiRequestStatus = "completed"
+	Canceled                 TaxiRequestStatus = "canceled"
 )
 
 func TaxiRequestStatusFromString(s string) (TaxiRequestStatus, error) {
 	switch s {
-	case FindingDriver.slug:
+	case "findingDriver":
 		return FindingDriver, nil
-	case WaitingForDriver.slug:
+	case "waitingForDriver":
 		return WaitingForDriver, nil
-	case InProgress.slug:
+	case "inProgress":
 		return InProgress, nil
-	case Completed.slug:
+	case "completed":
 		return Completed, nil
-	case Canceled.slug:
+	case "canceled":
 		return Canceled, nil
 	}
 
-	return UnknownStatus, errors.New("unknown TaxiRequestStatus: " + s)
+	return UnknownTaxiRequestStatus, errors.New("Unknown TaxiRequestStatus: " + s)
 }
 
 // Automatically set to FindingDriver when creating an order
@@ -51,8 +47,8 @@ func CreateTaxiRequest(reqId, clId, drId, depId, destId int, price float64) Taxi
 	return TaxiRequest{reqId, clId, drId, depId, destId, price, FindingDriver}
 }
 
-func (r *TaxiRequest) SetClientId(c int) {
-	r.ClientId = c
+func (r *TaxiRequest) SetCustomerId(c int) {
+	r.CustomerId = c
 }
 
 func (r *TaxiRequest) SetDriverId(d int) {
