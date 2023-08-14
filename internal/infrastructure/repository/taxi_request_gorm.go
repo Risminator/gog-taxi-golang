@@ -31,7 +31,7 @@ func (repo *taxiRequestRepository) CreateRequest(r *model.TaxiRequest) error {
 // GetRequestById implements usecase.TaxiRequestRepository.
 func (repo *taxiRequestRepository) GetRequestById(id int) (*model.TaxiRequest, error) {
 	var req *model.TaxiRequest
-	err := repo.db.Table(taxiRequestTableName).Find(&req, "taxi_request_id = ?", id).Error
+	err := repo.db.Table(taxiRequestTableName).First(&req, "taxi_request_id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
