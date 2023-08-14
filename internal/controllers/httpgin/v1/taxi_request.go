@@ -11,7 +11,7 @@ import (
 
 type TaxiRequestWsGateway interface {
 	SendNewTaxiRequest(req model.TaxiRequest) error
-	ConnectWebsocket(w http.ResponseWriter, r *http.Request, u *model.User)
+	ConnectWebsocket(w http.ResponseWriter, r *http.Request, userId int, role model.UserRole)
 }
 
 type taxiRequestRoutes struct {
@@ -42,13 +42,14 @@ func (r *taxiRequestRoutes) getRequestById(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, msg)
+	c.JSON(http.StatusOK, *msg)
 }
 
 func (r *taxiRequestRoutes) getRequestsByStatus(c *gin.Context) {
 	status, err := model.TaxiRequestStatusFromString(c.Param("status"))
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
+		return
 	}
 
 	msg, err := r.taxiUsecase.GetRequestsByStatus(status)
@@ -66,11 +67,14 @@ func (r *taxiRequestRoutes) createRequest(c *gin.Context) {
 		return
 	}
 
-	msg, err := r.taxiUsecase.CreateRequest(body.TaxiRequestId, body.ClientId, body.DriverId, body.DepartureId, body.DestinationId, body.Price)
+	msg, err := r.taxiUsecase.CreateRequest(body.TaxiRequestId, body.CustomerId, body.DriverId, body.DepartureId, body.DestinationId, body.Price)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	// TODO: add websocket functions
+
+	r.taxiWebsockets.ConnectWebsocket(c.Writer, c.Request, body.CustomerId, model.CustomerRole)
+	r.taxiWebsockets.SendNewTaxiRequest(body)
+
 	c.JSON(http.StatusOK, msg)
 }

@@ -43,13 +43,16 @@ func (h *wsTaxiRequestHandler) SendNewTaxiRequest(req model.TaxiRequest) error {
 	return nil
 }
 
-func (h *wsTaxiRequestHandler) ConnectWebsocket(w http.ResponseWriter, r *http.Request, u *model.User) {
-	h.wsManager.serveWS(w, r, u)
+func (h *wsTaxiRequestHandler) ConnectWebsocket(w http.ResponseWriter, r *http.Request, userId int, role model.UserRole) {
+	u := model.NewUser(userId, role)
+	h.wsManager.serveWS(w, r, &u)
 }
 
 /*
-Driver's location is sent to the clients of both customer and driver (do we need to send it to driver's backend?).
+Driver's location is sent to the driver's client.
 Event should include fields (may be appended in future):
+request:	TaxiRequest
+origin:		UserRole???
 latitude:	float64 (double precision)
 longitude:	float64 (double precision)
 */
@@ -60,6 +63,8 @@ func SendNewLocation(event Event, c *WebsocketClient) error {
 	}
 
 	// TODO: Send location to relevant users (need to find a client knowing user)
+	//for client := range c.manager.clients {
+	//}
 
 	return nil
 }
