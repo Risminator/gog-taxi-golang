@@ -47,8 +47,9 @@ func (r *dockRoutes) getDockById(c *gin.Context) {
 	msg, err := r.du.GetDockById(id)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
-	c.JSON(http.StatusOK, msg)
+	c.JSON(http.StatusOK, *msg)
 }
 func (r *dockRoutes) createDock(c *gin.Context) {
 	var body dockInput

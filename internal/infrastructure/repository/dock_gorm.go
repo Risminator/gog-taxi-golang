@@ -30,12 +30,12 @@ func (repo *dockRepository) CreateDock(dock *model.Dock) error {
 
 // GetDockById implements usecase.DockRepository.
 func (repo *dockRepository) GetDockById(id int) (*model.Dock, error) {
-	var dock *model.Dock
-	err := repo.db.Table(dockTableName).Find(&dock, "dock_id = ?", id).Error
+	var dock model.Dock
+	err := repo.db.Table(dockTableName).First(&dock, "dock_id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
-	return dock, nil
+	return &dock, nil
 }
 
 // GetDocks implements usecase.DockRepository.
