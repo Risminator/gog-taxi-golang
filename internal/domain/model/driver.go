@@ -2,6 +2,10 @@
 
 package model
 
+import (
+	"errors"
+)
+
 // Should vessel id be here???
 // 1:1 vessel is not necessary
 // Business rule: Driver can not look for requests with VesselId = 0
@@ -16,18 +20,32 @@ type Driver struct {
 	CertDriving  int          `json:"cert_driving"`
 }
 
-type DriverStatus uint
+type DriverStatus string
 
 const (
-	Busy DriverStatus = iota
-	Waiting
-	Afw
+	UnknownDriverStatus DriverStatus = ""
+	Busy                DriverStatus = "busy"
+	Waiting             DriverStatus = "waiting"
+	Afw                 DriverStatus = "afw"
 )
+
+func DriverStatusFromString(str string) (DriverStatus, error) {
+	switch str {
+	case "busy":
+		return Busy, nil
+	case "waiting":
+		return Waiting, nil
+	case "afw":
+		return Afw, nil
+	}
+
+	return UnknownDriverStatus, errors.New("Unknown DriverStatus: " + str)
+}
 
 // IS BAD! WHAT TO DO WITH VesselId?
 // Also add defaults to db?
-func (d *Driver) CreateDriver(id int, firstName string, lastName string, vesselId int) Driver {
-	return Driver{id, firstName, lastName, vesselId, Busy, 0, 0, 0}
+func CreateDriver(id int, firstName string, lastName string, vesselId int, certFA int, certD int) Driver {
+	return Driver{id, firstName, lastName, vesselId, Busy, 0, certFA, certD}
 }
 
 func (d *Driver) SetFirstName(f string) {
