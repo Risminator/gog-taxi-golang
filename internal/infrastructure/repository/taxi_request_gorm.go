@@ -21,7 +21,7 @@ func NewTaxiRequestRepository(db *gorm.DB) usecase.TaxiRequestRepository {
 
 // CreateRequest implements usecase.TaxiRequestRepository.
 func (repo *taxiRequestRepository) CreateRequest(r *model.TaxiRequest) error {
-	err := repo.db.Clauses(clause.Returning{}).Table(dockTableName).Create(&r).Error
+	err := repo.db.Clauses(clause.Returning{}).Table(taxiRequestTableName).Create(&r).Error
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (repo *taxiRequestRepository) CreateRequest(r *model.TaxiRequest) error {
 // GetRequestById implements usecase.TaxiRequestRepository.
 func (repo *taxiRequestRepository) GetRequestById(id int) (*model.TaxiRequest, error) {
 	var req *model.TaxiRequest
-	err := repo.db.Table(dockTableName).Find(&req, "id = ?", id).Error
+	err := repo.db.Table(taxiRequestTableName).Find(&req, "taxi_request_id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (repo *taxiRequestRepository) GetRequestById(id int) (*model.TaxiRequest, e
 // GetRequestsByStatus implements usecase.TaxiRequestRepository.
 func (repo *taxiRequestRepository) GetRequestsByStatus(status model.TaxiRequestStatus) ([]model.TaxiRequest, error) {
 	var reqs []model.TaxiRequest
-	err := repo.db.Table(dockTableName).Find(&reqs, "status = ?", status).Error
+	err := repo.db.Table(taxiRequestTableName).Find(&reqs, "status = ?", status).Error
 	if err != nil {
 		return nil, err
 	}

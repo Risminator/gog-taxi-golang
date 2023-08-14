@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-const driverTable = "gog_demo.driver"
+const driverTableName = "gog_demo.driver"
 
 type driverRepository struct {
 	db *gorm.DB
@@ -21,7 +21,7 @@ func NewDriverRepository(db *gorm.DB) usecase.DriverRepository {
 
 func (cr *driverRepository) GetAllDrivers() ([]model.Driver, error) {
 	var drivers []model.Driver
-	err := cr.db.Table(driverTable).Find(&drivers).Error
+	err := cr.db.Table(driverTableName).Find(&drivers).Error
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -32,7 +32,7 @@ func (cr *driverRepository) GetAllDrivers() ([]model.Driver, error) {
 
 func (cr *driverRepository) GetDriverByID(ID int) (*model.Driver, error) {
 	var driver model.Driver
-	err := cr.db.Table(driverTable).First(&driver, "driver_id = ?", ID).Error
+	err := cr.db.Table(driverTableName).First(&driver, "driver_id = ?", ID).Error
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (cr *driverRepository) GetDriverByID(ID int) (*model.Driver, error) {
 }
 
 func (cr *driverRepository) CreateDriver(driver *model.Driver) error {
-	err := cr.db.Table(driverTable).Select("phone", "first_name", "last_name").Create(driver).Error
+	err := cr.db.Table(driverTableName).Select("phone", "first_name", "last_name").Create(driver).Error
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (cr *driverRepository) CreateDriver(driver *model.Driver) error {
 }
 
 func (cr *driverRepository) UpdateDriver(driver *model.Driver) error {
-	err := cr.db.Clauses(clause.Returning{}).Table(driverTable).Updates(&driver).Error
+	err := cr.db.Clauses(clause.Returning{}).Table(driverTableName).Updates(&driver).Error
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func (cr *driverRepository) UpdateDriver(driver *model.Driver) error {
 
 func (cr *driverRepository) DeleteDriver(ID int) (*model.Driver, error) {
 	var driver model.Driver
-	err := cr.db.Clauses(clause.Returning{}).Table(driverTable).Delete(&driver, ID).Error
+	err := cr.db.Clauses(clause.Returning{}).Table(driverTableName).Delete(&driver, ID).Error
 	if err != nil {
 		return nil, err
 	}
