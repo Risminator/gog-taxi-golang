@@ -68,7 +68,7 @@ func (r *driverRoutes) createDriver(c *gin.Context) {
 		return
 	}
 
-	msg, err := r.du.CreateDriver(body.FirstName, body.LastName, body.VesselId, body.CertFirstAid, body.CertDriving)
+	msg, err := r.du.CreateDriver(body.FirstName, body.LastName, body.VesselId, body.Status, body.Balance, body.CertFirstAid, body.CertDriving)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return

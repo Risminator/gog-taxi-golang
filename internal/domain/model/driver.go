@@ -44,8 +44,8 @@ func DriverStatusFromString(str string) (DriverStatus, error) {
 
 // IS BAD! WHAT TO DO WITH VesselId?
 // Also add defaults to db?
-func CreateDriver(id int, firstName string, lastName string, vesselId int, certFA int, certD int) Driver {
-	return Driver{id, firstName, lastName, vesselId, Busy, 0, certFA, certD}
+func CreateDriver(id int, firstName string, lastName string, vesselId int, status DriverStatus, balance float64, certFA int, certD int) Driver {
+	return Driver{id, firstName, lastName, vesselId, status, balance, certFA, certD}
 }
 
 func (d *Driver) SetFirstName(f string) {

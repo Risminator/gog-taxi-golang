@@ -7,7 +7,7 @@ import (
 type Driver interface {
 	GetAllDrivers() ([]model.Driver, error)
 	GetDriverByID(ID int) (*model.Driver, error)
-	CreateDriver(fName string, lName string, vesselId int, certFA int, certDr int) (*model.Driver, error)
+	CreateDriver(fName string, lName string, vesselId int, status model.DriverStatus, balance float64, certFA int, certDr int) (*model.Driver, error)
 	UpdateDriver(ID int, fName string, lName string, vesselId int, status model.DriverStatus, balance float64, certFA int, certD int) (*model.Driver, error)
 	DeleteDriver(ID int) (*model.Driver, error)
 }
@@ -44,8 +44,8 @@ func (d *driverUsecase) GetDriverByID(ID int) (*model.Driver, error) {
 	return driver, nil
 }
 
-func (d *driverUsecase) CreateDriver(fName string, lName string, vesselId int, certFA int, certDr int) (*model.Driver, error) {
-	driver := model.CreateDriver(0, fName, lName, vesselId, certFA, certDr)
+func (d *driverUsecase) CreateDriver(fName string, lName string, vesselId int, status model.DriverStatus, balance float64, certFA int, certDr int) (*model.Driver, error) {
+	driver := model.CreateDriver(0, fName, lName, vesselId, status, balance, certFA, certDr)
 	err := d.driverRepository.CreateDriver(&driver)
 	if err != nil {
 		return nil, err
