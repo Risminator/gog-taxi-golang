@@ -41,7 +41,7 @@ func (cr *driverRepository) GetDriverByID(ID int) (*model.Driver, error) {
 }
 
 func (cr *driverRepository) CreateDriver(driver *model.Driver) error {
-	err := cr.db.Table(driverTableName).Select("phone", "first_name", "last_name").Create(driver).Error
+	err := cr.db.Table(driverTableName).Select("first_name", "last_name", "vessel_id", "status", "balance", "cert_first_aid", "cert_driving").Create(driver).Error
 	if err != nil {
 		return err
 	}
