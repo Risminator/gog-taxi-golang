@@ -19,9 +19,9 @@ func NewDriverRepository(db *gorm.DB) usecase.DriverRepository {
 	return &driverRepository{db}
 }
 
-func (cr *driverRepository) GetAllDrivers() ([]model.Driver, error) {
+func (dr *driverRepository) GetAllDrivers() ([]model.Driver, error) {
 	var drivers []model.Driver
-	err := cr.db.Table(driverTableName).Find(&drivers).Error
+	err := dr.db.Table(driverTableName).Find(&drivers).Error
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -30,9 +30,9 @@ func (cr *driverRepository) GetAllDrivers() ([]model.Driver, error) {
 	return drivers, nil
 }
 
-func (cr *driverRepository) GetDriverByID(ID int) (*model.Driver, error) {
+func (dr *driverRepository) GetDriverByID(ID int) (*model.Driver, error) {
 	var driver model.Driver
-	err := cr.db.Table(driverTableName).First(&driver, "driver_id = ?", ID).Error
+	err := dr.db.Table(driverTableName).First(&driver, "driver_id = ?", ID).Error
 	if err != nil {
 		return nil, err
 	}
@@ -40,8 +40,8 @@ func (cr *driverRepository) GetDriverByID(ID int) (*model.Driver, error) {
 	return &driver, nil
 }
 
-func (cr *driverRepository) CreateDriver(driver *model.Driver) error {
-	err := cr.db.Table(driverTableName).Select("first_name", "last_name", "vessel_id", "status", "balance", "cert_first_aid", "cert_driving").Create(driver).Error
+func (dr *driverRepository) CreateDriver(driver *model.Driver) error {
+	err := dr.db.Table(driverTableName).Select("first_name", "last_name", "vessel_id", "status", "balance", "cert_first_aid", "cert_driving").Create(driver).Error
 	if err != nil {
 		return err
 	}
@@ -49,8 +49,8 @@ func (cr *driverRepository) CreateDriver(driver *model.Driver) error {
 	return nil
 }
 
-func (cr *driverRepository) UpdateDriver(driver *model.Driver) error {
-	err := cr.db.Clauses(clause.Returning{}).Table(driverTableName).Updates(&driver).Error
+func (dr *driverRepository) UpdateDriver(driver *model.Driver) error {
+	err := dr.db.Clauses(clause.Returning{}).Table(driverTableName).Updates(&driver).Error
 	if err != nil {
 		return err
 	}
@@ -58,9 +58,9 @@ func (cr *driverRepository) UpdateDriver(driver *model.Driver) error {
 	return nil
 }
 
-func (cr *driverRepository) DeleteDriver(ID int) (*model.Driver, error) {
+func (dr *driverRepository) DeleteDriver(ID int) (*model.Driver, error) {
 	var driver model.Driver
-	err := cr.db.Clauses(clause.Returning{}).Table(driverTableName).Delete(&driver, ID).Error
+	err := dr.db.Clauses(clause.Returning{}).Table(driverTableName).Delete(&driver, ID).Error
 	if err != nil {
 		return nil, err
 	}
