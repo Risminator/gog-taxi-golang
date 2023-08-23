@@ -63,7 +63,7 @@ func CreateServer(ctx context.Context, ch chan int) *http.Server {
 	ru := usecase.NewTaxiRequestUsecase(rr)
 
 	wsManager := websockets.NewManager(ctx)
-	rws := websockets.NewWsTaxiRequestHandler(wsManager)
+	rws := websockets.NewWsTaxiRequestHandler(wsManager, ru)
 
 	httpServer := NewHTTPServer(httpPort, hu, cu, du, dru, ru, rws)
 	eg, ctx := errgroup.WithContext(ctx)

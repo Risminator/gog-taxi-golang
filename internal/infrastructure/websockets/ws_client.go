@@ -25,6 +25,12 @@ type WebsocketClient struct {
 	// client is either driver or customer
 	user *model.User
 
+	// determines the purpose of a given websocket client
+	clientType model.WebsocketClientType
+
+	// requestId is needed to get request info when needed
+	requestId int
+
 	// egress is used to avoid concurrent writes on the WebSocket
 	egress chan Event
 }
@@ -39,13 +45,23 @@ var (
 )
 
 // NewWebsocketClient is used to initialize a new Client with all required values initialized
-func NewWebsocketClient(conn *websocket.Conn, user *model.User) *WebsocketClient {
+func NewWebsocketClient(conn *websocket.Conn, manager *WebsocketManager, user *model.User, clientType model.WebsocketClientType, reqId int) *WebsocketClient {
 	return &WebsocketClient{
 		connection: conn,
-		// manager: manager
-		user:   user,
-		egress: make(chan Event),
+		manager:    manager,
+		user:       user,
+		clientType: clientType,
+		requestId:  reqId,
+		egress:     make(chan Event),
 	}
+}
+
+func (c *WebsocketClient) setWsClientType(t model.WebsocketClientType) {
+	c.clientType = t
+}
+
+func (c *WebsocketClient) setRequestId(id int) {
+	c.requestId = id
 }
 
 // readMessages will start the client to read messages and handle them

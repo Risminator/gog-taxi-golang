@@ -6,11 +6,13 @@ type TaxiRequest interface {
 	GetRequestsByStatus(status model.TaxiRequestStatus) ([]model.TaxiRequest, error)
 	GetRequestById(id int) (*model.TaxiRequest, error)
 	CreateRequest(reqId, clId, drId, depId, destId int, price float64) (*model.TaxiRequest, error)
+	UpdateRequest(reqId int, clId int, drId int, depId int, destId int, price float64, status model.TaxiRequestStatus) (*model.TaxiRequest, error)
 }
 type TaxiRequestRepository interface {
 	GetRequestsByStatus(status model.TaxiRequestStatus) ([]model.TaxiRequest, error)
 	GetRequestById(id int) (*model.TaxiRequest, error)
 	CreateRequest(r *model.TaxiRequest) error
+	UpdateRequest(request *model.TaxiRequest) error
 }
 
 type taxiRequestUsecase struct {
@@ -47,4 +49,24 @@ func (use *taxiRequestUsecase) GetRequestsByStatus(status model.TaxiRequestStatu
 		return nil, err
 	}
 	return reqs, nil
+}
+
+func (use *taxiRequestUsecase) UpdateRequest(reqId int, clId int, drId int, depId int, destId int, price float64, status model.TaxiRequestStatus) (*model.TaxiRequest, error) {
+	request, err := use.GetRequestById(reqId)
+	if err != nil {
+		return nil, err
+	}
+
+	request.SetCustomerId(clId)
+	request.SetDriverId(drId)
+	request.SetDepartureId(depId)
+	request.SetDestinationId(destId)
+	request.SetPrice(price)
+	request.SetStatus(status)
+
+	err = use.requestRepo.UpdateRequest(request)
+	if err != nil {
+		return nil, err
+	}
+	return request, nil
 }

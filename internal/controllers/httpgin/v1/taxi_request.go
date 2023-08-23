@@ -11,7 +11,7 @@ import (
 
 type TaxiRequestWsGateway interface {
 	SendNewTaxiRequest(req model.TaxiRequest) error
-	ConnectWebsocket(w http.ResponseWriter, r *http.Request, userId int, role model.UserRole)
+	ConnectWebsocket(w http.ResponseWriter, r *http.Request, userId int, role model.UserRole, clientType model.WebsocketClientType, reqId int)
 }
 
 type taxiRequestRoutes struct {
@@ -73,7 +73,7 @@ func (r *taxiRequestRoutes) createRequest(c *gin.Context) {
 		return
 	}
 
-	r.taxiWebsockets.ConnectWebsocket(c.Writer, c.Request, body.CustomerId, model.CustomerRole)
+	r.taxiWebsockets.ConnectWebsocket(c.Writer, c.Request, body.CustomerId, model.CustomerRole, model.CustomerCurrentTaxiRequestInfo, body.TaxiRequestId)
 	r.taxiWebsockets.SendNewTaxiRequest(body)
 
 	c.JSON(http.StatusOK, msg)

@@ -47,3 +47,12 @@ func (repo *taxiRequestRepository) GetRequestsByStatus(status model.TaxiRequestS
 	}
 	return reqs, nil
 }
+
+func (repo *taxiRequestRepository) UpdateRequest(request *model.TaxiRequest) error {
+	err := repo.db.Clauses(clause.Returning{}).Table(taxiRequestTableName).Updates(&request).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

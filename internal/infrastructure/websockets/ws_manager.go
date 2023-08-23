@@ -66,7 +66,7 @@ func (m *WebsocketManager) routeEvent(event Event, c *WebsocketClient) error {
 }
 
 // serveWS is a HTTP Handler that the has the Manager that allows connections
-func (m *WebsocketManager) serveWS(w http.ResponseWriter, r *http.Request, u *model.User) {
+func (m *WebsocketManager) serveWS(w http.ResponseWriter, r *http.Request, u *model.User, t model.WebsocketClientType, reqId int) {
 	log.Println("New connection")
 	// Begin by upgrading the HTTP request
 	conn, err := websocketUpgrader.Upgrade(w, r, nil)
@@ -76,7 +76,7 @@ func (m *WebsocketManager) serveWS(w http.ResponseWriter, r *http.Request, u *mo
 	}
 
 	// Create New Client
-	client := NewWebsocketClient(conn, u)
+	client := NewWebsocketClient(conn, m, u, t, reqId)
 	// Add the newly created client to the manager
 	m.addClient(client)
 
