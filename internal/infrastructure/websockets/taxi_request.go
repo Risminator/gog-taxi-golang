@@ -22,14 +22,14 @@ type wsTaxiRequestHandler struct {
 }
 
 func NewWsTaxiRequestHandler(wsManager *WebsocketManager, taxiUsecase usecase.TaxiRequest) v1.TaxiRequestWsGateway {
-	wsManager.handlers[EventWsClientUpdate] = UpdateWsClient
-	wsManager.handlers[EventSendLocationUpdate] = SendNewLocation
-	wsManager.handlers[EventSendTaxiRequestUpdate] = SendTaxiRequestUpdate
+	wsManager.handlers[model.EventWsClientUpdate] = UpdateWsClient
+	wsManager.handlers[model.EventSendLocationUpdate] = SendNewLocation
+	wsManager.handlers[model.EventSendTaxiRequestUpdate] = SendTaxiRequestUpdate
 
 	return &wsTaxiRequestHandler{wsManager, taxiUsecase}
 }
 
-func UpdateWsClient(event Event, c *WebsocketClient) error {
+func UpdateWsClient(event model.Event, c *WebsocketClient) error {
 	var options wsClientOptions
 	if err := json.Unmarshal(event.Payload, &options); err != nil {
 		return fmt.Errorf("bad payload in event: %v", err)
@@ -58,15 +58,15 @@ origin:		UserRole???
 latitude:	float64 (double precision)
 longitude:	float64 (double precision)
 */
-func SendNewLocation(event Event, c *WebsocketClient) error {
+func SendNewLocation(event model.Event, c *WebsocketClient) error {
 	var location model.Location
 	if err := json.Unmarshal(event.Payload, &location); err != nil {
 		return fmt.Errorf("bad payload in event: %v", err)
 	}
 
 	// Create an event for user to receive
-	var outEvent Event
-	outEvent.Type = EventLocationUpdate
+	var outEvent model.Event
+	outEvent.Type = model.EventLocationUpdate
 	data, err := json.Marshal(location)
 	if err != nil {
 		log.Printf("failed to marshal request info: %v", err)
@@ -90,15 +90,15 @@ Status update is sent to the customer.
 Event should include fields (may be appended in future):
 status: string
 */
-func SendTaxiRequestUpdate(event Event, c *WebsocketClient) error {
+func SendTaxiRequestUpdate(event model.Event, c *WebsocketClient) error {
 	var reqUpdate model.TaxiRequest
 	if err := json.Unmarshal(event.Payload, &reqUpdate); err != nil {
 		return fmt.Errorf("bad payload in event: %v", err)
 	}
 
 	// Create an event for user to receive
-	var outEvent Event
-	outEvent.Type = EventTaxiRequestUpdate
+	var outEvent model.Event
+	outEvent.Type = model.EventTaxiRequestUpdate
 	data, err := json.Marshal(outEvent)
 	if err != nil {
 		log.Printf("failed to marshal request info: %v", err)
@@ -119,8 +119,8 @@ func SendTaxiRequestUpdate(event Event, c *WebsocketClient) error {
 // Customer sends new TaxiRequest to drivers
 func (h *wsTaxiRequestHandler) SendNewTaxiRequest(req model.TaxiRequest) error {
 	// Create an event for drivers to receive
-	var outEvent Event
-	outEvent.Type = EventNewTaxiRequest
+	var outEvent model.Event
+	outEvent.Type = model.EventNewTaxiRequest
 	data, err := json.Marshal(req)
 	if err != nil {
 		log.Printf("failed to marshal request info: %v", err)
@@ -139,7 +139,16 @@ func (h *wsTaxiRequestHandler) SendNewTaxiRequest(req model.TaxiRequest) error {
 	return nil
 }
 
-func (h *wsTaxiRequestHandler) ConnectWebsocket(w http.ResponseWriter, r *http.Request, userId int, role model.UserRole, t model.WebsocketClientType, reqId int) {
+func (h *wsTaxiRequestHandler) ConnectWebsocket(w http.ResponseWriter, r *http.Request, userId int, role model.UserRole, t model.WebsocketClientType, reqId int, initEvent *model.Event) error {
 	u := model.NewUser(userId, role)
-	h.wsManager.serveWS(w, r, &u, t, reqId)
+	client, err := h.wsManager.serveWS(w, r, &u, t, reqId)
+	if err != nil {
+		return err
+	}
+
+	if initEvent != nil {
+		client.egress <- *initEvent
+	}
+
+	return nil
 }

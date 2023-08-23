@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -11,7 +13,7 @@ import (
 
 type TaxiRequestWsGateway interface {
 	SendNewTaxiRequest(req model.TaxiRequest) error
-	ConnectWebsocket(w http.ResponseWriter, r *http.Request, userId int, role model.UserRole, clientType model.WebsocketClientType, reqId int)
+	ConnectWebsocket(w http.ResponseWriter, r *http.Request, userId int, role model.UserRole, ct model.WebsocketClientType, reqId int, initEvent *model.Event) error
 }
 
 type taxiRequestRoutes struct {
@@ -27,6 +29,7 @@ func registerTaxiRequestRoutes(r *gin.RouterGroup, taxiUsecase usecase.TaxiReque
 		h.GET("/:id", routes.getRequestById)
 		h.GET("/status/:status", routes.getRequestsByStatus)
 		h.POST("/", routes.createRequest)
+		h.GET("/stream-order-offer/:driverId", routes.streamOrderOffer)
 	}
 }
 
@@ -73,8 +76,36 @@ func (r *taxiRequestRoutes) createRequest(c *gin.Context) {
 		return
 	}
 
-	r.taxiWebsockets.ConnectWebsocket(c.Writer, c.Request, body.CustomerId, model.CustomerRole, model.CustomerCurrentTaxiRequestInfo, body.TaxiRequestId)
+	r.taxiWebsockets.ConnectWebsocket(c.Writer, c.Request, body.CustomerId, model.CustomerRole, model.CustomerCurrentTaxiRequestInfo, body.TaxiRequestId, nil)
 	r.taxiWebsockets.SendNewTaxiRequest(body)
 
 	c.JSON(http.StatusOK, msg)
+}
+
+func (r *taxiRequestRoutes) streamOrderOffer(c *gin.Context) {
+	driverId, err := strconv.Atoi(c.Param("driverId"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	// get current untaken taxi requests
+	untakenRequests, err := r.taxiUsecase.GetRequestsByStatus(model.FindingDriver)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// prepare initial message with current taxi requests
+	var initMessage model.Event
+	initMessage.Type = model.EventNewTaxiRequest
+	data, err := json.Marshal(untakenRequests)
+	if err != nil {
+		log.Printf("failed to marshal request info: %v", err)
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	initMessage.Payload = data
+
+	r.taxiWebsockets.ConnectWebsocket(c.Writer, c.Request, driverId, model.DriverRole, model.DriverGetOffers, 0, &initMessage)
 }

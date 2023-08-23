@@ -52,7 +52,7 @@ func (m *WebsocketManager) setupEventHandlers() {
 }
 
 // routeEvent is used to make sure the correct event goes into the correct handler
-func (m *WebsocketManager) routeEvent(event Event, c *WebsocketClient) error {
+func (m *WebsocketManager) routeEvent(event model.Event, c *WebsocketClient) error {
 	// Check if Handler is present in Map
 	if handler, ok := m.handlers[event.Type]; ok {
 		// Execute the handler and return any err
@@ -66,13 +66,13 @@ func (m *WebsocketManager) routeEvent(event Event, c *WebsocketClient) error {
 }
 
 // serveWS is a HTTP Handler that the has the Manager that allows connections
-func (m *WebsocketManager) serveWS(w http.ResponseWriter, r *http.Request, u *model.User, t model.WebsocketClientType, reqId int) {
+func (m *WebsocketManager) serveWS(w http.ResponseWriter, r *http.Request, u *model.User, t model.WebsocketClientType, reqId int) (*WebsocketClient, error) {
 	log.Println("New connection")
 	// Begin by upgrading the HTTP request
 	conn, err := websocketUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
-		return
+		return nil, err
 	}
 
 	// Create New Client
@@ -82,6 +82,8 @@ func (m *WebsocketManager) serveWS(w http.ResponseWriter, r *http.Request, u *mo
 
 	go client.readMessages(m)
 	go client.writeMessages(m)
+
+	return client, nil
 }
 
 // addClient will add clients to our clientList

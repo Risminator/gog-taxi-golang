@@ -32,7 +32,7 @@ type WebsocketClient struct {
 	requestId int
 
 	// egress is used to avoid concurrent writes on the WebSocket
-	egress chan Event
+	egress chan model.Event
 }
 
 var (
@@ -52,7 +52,7 @@ func NewWebsocketClient(conn *websocket.Conn, manager *WebsocketManager, user *m
 		user:       user,
 		clientType: clientType,
 		requestId:  reqId,
-		egress:     make(chan Event),
+		egress:     make(chan model.Event),
 	}
 }
 
@@ -99,7 +99,7 @@ func (c *WebsocketClient) readMessages(manager *WebsocketManager) {
 			break // Break the loop to close conn & Cleanup
 		}
 		// Marshal incoming data into a Event struct
-		var request Event
+		var request model.Event
 		if err := json.Unmarshal(payload, &request); err != nil {
 			log.Printf("error marshalling message: %v", err)
 			break // Breaking the connection here might be harsh xD
