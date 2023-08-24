@@ -1,7 +1,7 @@
 package model
 
 type Dock struct {
-	DockId    int     `json:"dock_id" gorm:"primaryKey"`
+	DockId    int     `json:"dockId" gorm:"primaryKey"`
 	Name      string  `json:"name"`
 	Active    bool    `json:"active"`
 	Latitude  float64 `json:"latitude"`

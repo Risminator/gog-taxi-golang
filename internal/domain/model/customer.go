@@ -1,10 +1,10 @@
 package model
 
 type Customer struct {
-	CustomerId int    `json:"customer_id" gorm:"primaryKey"`
+	CustomerId int    `json:"customerId" gorm:"primaryKey"`
 	Phone      string `json:"phone"`
-	FirstName  string `json:"first_name"`
-	LastName   string `json:"last_name"`
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
 }
 
 func CreateCustomer(id int, phone string, firstName string, lastName string) Customer {
