@@ -3,6 +3,8 @@ package repository
 import (
 	// "log"
 
+	"log"
+
 	"github.com/Risminator/gog-taxi-golang/internal/domain/model"
 	"github.com/Risminator/gog-taxi-golang/internal/usecase"
 	"gorm.io/gorm"
@@ -20,7 +22,7 @@ func NewTaxiRequestRepository(db *gorm.DB) usecase.TaxiRequestRepository {
 }
 
 // CreateRequest implements usecase.TaxiRequestRepository.
-func (repo *taxiRequestRepository) CreateRequest(r *model.TaxiRequest) error {
+func (repo *taxiRequestRepository) CreateRequest(r *model.TaxiRequest) (int, error) {
 	request := map[string]interface{}{
 		"customer_id":    r.CustomerId,
 		"driver_id":      r.DriverId,
@@ -36,9 +38,12 @@ func (repo *taxiRequestRepository) CreateRequest(r *model.TaxiRequest) error {
 
 	err := repo.db.Clauses(clause.Returning{}).Table(taxiRequestTableName).Create(&request).Error
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+
+	log.Println(request)
+
+	return request["taxi_request_id"].(int), nil
 }
 
 // GetRequestById implements usecase.TaxiRequestRepository.

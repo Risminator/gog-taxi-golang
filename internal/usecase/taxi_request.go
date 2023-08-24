@@ -11,7 +11,7 @@ type TaxiRequest interface {
 type TaxiRequestRepository interface {
 	GetRequestsByStatus(status model.TaxiRequestStatus) ([]model.TaxiRequest, error)
 	GetRequestById(id int) (*model.TaxiRequest, error)
-	CreateRequest(r *model.TaxiRequest) error
+	CreateRequest(r *model.TaxiRequest) (int, error)
 	UpdateRequest(request *model.TaxiRequest) error
 }
 
@@ -26,10 +26,13 @@ func NewTaxiRequestUsecase(requestRepo TaxiRequestRepository) TaxiRequest {
 // CreateRequest implements TaxiRequest.
 func (use *taxiRequestUsecase) CreateRequest(reqId int, clId int, drId int, depId int, destId int, price float64) (*model.TaxiRequest, error) {
 	req := model.CreateTaxiRequest(reqId, clId, drId, depId, destId, price)
-	err := use.requestRepo.CreateRequest(&req)
+	id, err := use.requestRepo.CreateRequest(&req)
 	if err != nil {
 		return nil, err
 	}
+
+	// FIX!!!!!!!!!!!!
+	req.TaxiRequestId = id
 	return &req, nil
 }
 
@@ -68,5 +71,6 @@ func (use *taxiRequestUsecase) UpdateRequest(reqId int, clId int, drId int, depI
 	if err != nil {
 		return nil, err
 	}
+
 	return request, nil
 }
