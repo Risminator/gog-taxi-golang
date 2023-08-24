@@ -29,6 +29,7 @@ func registerTaxiRequestRoutes(r *gin.RouterGroup, taxiUsecase usecase.TaxiReque
 		h.GET("/:id", routes.getRequestById)
 		h.GET("/status/:status", routes.getRequestsByStatus)
 		h.POST("/", routes.createRequest)
+		h.GET("/stream-order-status/:requestId", routes.streamOrderStatus)
 		h.GET("/stream-order-offer/:driverId", routes.streamOrderOffer)
 	}
 }
@@ -76,8 +77,24 @@ func (r *taxiRequestRoutes) createRequest(c *gin.Context) {
 		return
 	}
 
-	r.taxiWebsockets.ConnectWebsocket(c.Writer, c.Request, body.CustomerId, model.CustomerRole, model.CustomerCurrentTaxiRequestInfo, req.TaxiRequestId, nil)
 	r.taxiWebsockets.SendNewTaxiRequest(*req)
+	c.JSON(http.StatusCreated, req)
+}
+
+func (r *taxiRequestRoutes) streamOrderStatus(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("requestId"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	req, err := r.taxiUsecase.GetRequestById(id)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	r.taxiWebsockets.ConnectWebsocket(c.Writer, c.Request, req.CustomerId, model.CustomerRole, model.CustomerCurrentTaxiRequestInfo, req.TaxiRequestId, nil)
 }
 
 func (r *taxiRequestRoutes) streamOrderOffer(c *gin.Context) {
