@@ -55,6 +55,7 @@ func (h *wsTaxiRequestHandler) SendNewLocation(event model.Event, c *WebsocketCl
 	for client := range c.manager.clients {
 		if client.requestId == c.requestId && !(client.user.Role == c.user.Role && client.user.UserId == c.user.UserId) {
 			client.egress <- outEvent
+			break
 		}
 	}
 
@@ -105,6 +106,7 @@ func (h *wsTaxiRequestHandler) SendTaxiRequestUpdate(event model.Event, c *Webso
 	for client := range c.manager.clients {
 		if client.requestId == c.requestId && !(client.user.Role == c.user.Role && client.user.UserId == c.user.UserId) {
 			client.egress <- outEvent
+			break
 		}
 	}
 
