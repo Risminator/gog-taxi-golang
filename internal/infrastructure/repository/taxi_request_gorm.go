@@ -22,13 +22,12 @@ func NewTaxiRequestRepository(db *gorm.DB) usecase.TaxiRequestRepository {
 // CreateRequest implements usecase.TaxiRequestRepository.
 func (repo *taxiRequestRepository) CreateRequest(r *model.TaxiRequest) error {
 	request := map[string]interface{}{
-		"taxi_request_id": r.TaxiRequestId,
-		"customer_id":     r.CustomerId,
-		"driver_id":       r.DriverId,
-		"departure_id":    r.DepartureId,
-		"destination_id":  r.DestinationId,
-		"price":           r.Price,
-		"status":          r.Status,
+		"customer_id":    r.CustomerId,
+		"driver_id":      r.DriverId,
+		"departure_id":   r.DepartureId,
+		"destination_id": r.DestinationId,
+		"price":          r.Price,
+		"status":         r.Status,
 	}
 
 	if r.DriverId == 0 {
@@ -64,13 +63,12 @@ func (repo *taxiRequestRepository) GetRequestsByStatus(status model.TaxiRequestS
 
 func (repo *taxiRequestRepository) UpdateRequest(r *model.TaxiRequest) error {
 	request := map[string]interface{}{
-		"taxi_request_id": r.TaxiRequestId,
-		"customer_id":     r.CustomerId,
-		"driver_id":       r.DriverId,
-		"departure_id":    r.DepartureId,
-		"destination_id":  r.DestinationId,
-		"price":           r.Price,
-		"status":          r.Status,
+		"customer_id":    r.CustomerId,
+		"driver_id":      r.DriverId,
+		"departure_id":   r.DepartureId,
+		"destination_id": r.DestinationId,
+		"price":          r.Price,
+		"status":         r.Status,
 	}
 
 	if r.DriverId == 0 {
