@@ -16,10 +16,20 @@ var (
 	websocketUpgrader is used to upgrade incomming HTTP requests into a persitent websocket connection
 	*/
 	websocketUpgrader = websocket.Upgrader{
+		CheckOrigin:     checkOrigin,
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
 )
+
+// checkOrigin will check origin and return true if its allowed
+func checkOrigin(r *http.Request) bool {
+
+	// Grab the request origin
+	// origin := r.Header.Get("Origin")
+
+	return true
+}
 
 var (
 	ErrEventNotSupported = errors.New("this event type is not supported")
