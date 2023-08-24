@@ -43,7 +43,7 @@ func (repo *taxiRequestRepository) CreateRequest(r *model.TaxiRequest) (int, err
 
 	log.Println(request)
 
-	return request["taxi_request_id"].(int), nil
+	return int(request["taxi_request_id"].(int32)), nil
 }
 
 // GetRequestById implements usecase.TaxiRequestRepository.
