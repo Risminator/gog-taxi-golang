@@ -10,10 +10,10 @@ import (
 // 1:1 vessel is not necessary
 // Business rule: Driver can not look for requests with VesselId = 0
 type Driver struct {
-	DriverId     int          `json:"driver_id" gorm:"primaryKey"`
-	FirstName    string       `json:"first_name"`
-	LastName     string       `json:"last_name"`
-	VesselId     int          `json:"vessel_id"`
+	DriverId     int          `json:"driverId" gorm:"primaryKey"`
+	FirstName    string       `json:"firstName"`
+	LastName     string       `json:"lastName"`
+	VesselId     int          `json:"vesselId"`
 	Status       DriverStatus `json:"status"`
 	Balance      float64      `json:"balance"`
 	CertFirstAid int          `json:"cert_first_aid"`

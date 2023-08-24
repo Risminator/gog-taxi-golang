@@ -70,16 +70,14 @@ func (r *taxiRequestRoutes) createRequest(c *gin.Context) {
 		return
 	}
 
-	msg, err := r.taxiUsecase.CreateRequest(body.TaxiRequestId, body.CustomerId, body.DriverId, body.DepartureId, body.DestinationId, body.Price)
+	req, err := r.taxiUsecase.CreateRequest(body.TaxiRequestId, body.CustomerId, body.DriverId, body.DepartureId, body.DestinationId, body.Price)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	r.taxiWebsockets.ConnectWebsocket(c.Writer, c.Request, body.CustomerId, model.CustomerRole, model.CustomerCurrentTaxiRequestInfo, body.TaxiRequestId, nil)
-	r.taxiWebsockets.SendNewTaxiRequest(body)
-
-	c.JSON(http.StatusOK, msg)
+	r.taxiWebsockets.ConnectWebsocket(c.Writer, c.Request, body.CustomerId, model.CustomerRole, model.CustomerCurrentTaxiRequestInfo, req.TaxiRequestId, nil)
+	r.taxiWebsockets.SendNewTaxiRequest(*req)
 }
 
 func (r *taxiRequestRoutes) streamOrderOffer(c *gin.Context) {

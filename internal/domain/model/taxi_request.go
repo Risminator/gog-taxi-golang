@@ -5,11 +5,11 @@ import (
 )
 
 type TaxiRequest struct {
-	TaxiRequestId int               `json:"taxi_request_id" gorm:"primaryKey"`
-	CustomerId    int               `json:"customer_id"`
-	DriverId      int               `json:"driver_id"`
-	DepartureId   int               `json:"departure_id"`
-	DestinationId int               `json:"destination_id"`
+	TaxiRequestId int               `json:"requestId" gorm:"primaryKey"`
+	CustomerId    int               `json:"customerId"`
+	DriverId      int               `json:"driverId"`
+	DepartureId   int               `json:"departureId"`
+	DestinationId int               `json:"destinationId"`
 	Price         float64           `json:"price"`
 	Status        TaxiRequestStatus `json:"status"`
 }
