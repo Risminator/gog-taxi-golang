@@ -11,43 +11,19 @@ import (
 	"github.com/Risminator/gog-taxi-golang/internal/usecase"
 )
 
-type wsClientOptions struct {
-	ClientType *string `json:"clientType,omitempty"`
-	RequestId  *int    `json:"requestId,omitempty"`
-}
-
 type wsTaxiRequestHandler struct {
 	wsManager   *WebsocketManager
 	taxiUsecase usecase.TaxiRequest
 }
 
 func NewWsTaxiRequestHandler(wsManager *WebsocketManager, taxiUsecase usecase.TaxiRequest) v1.TaxiRequestWsGateway {
-	wsManager.handlers[model.EventWsClientUpdate] = UpdateWsClient
-	wsManager.handlers[model.EventSendLocationUpdate] = SendNewLocation
-	wsManager.handlers[model.EventSendTaxiRequestUpdate] = SendTaxiRequestUpdate
+	h := wsTaxiRequestHandler{wsManager, taxiUsecase}
 
-	return &wsTaxiRequestHandler{wsManager, taxiUsecase}
-}
+	h.wsManager.handlers[model.EventSendLocationUpdate] = h.SendNewLocation
+	h.wsManager.handlers[model.EventSendTaxiRequestUpdate] = h.SendTaxiRequestUpdate
+	h.wsManager.handlers[model.EventCancelTaxiRequest] = h.CancelTaxiRequest
 
-func UpdateWsClient(event model.Event, c *WebsocketClient) error {
-	var options wsClientOptions
-	if err := json.Unmarshal(event.Payload, &options); err != nil {
-		return fmt.Errorf("bad payload in event: %v", err)
-	}
-
-	if options.RequestId != nil {
-		c.setRequestId(*options.RequestId)
-	}
-
-	if options.ClientType != nil {
-		wsType, err := model.WsClientTypeFromString(*options.ClientType)
-		if err != nil {
-			fmt.Printf("bad payload in event: %v", err)
-		}
-		c.setWsClientType(wsType)
-	}
-
-	return nil
+	return &h
 }
 
 /*
@@ -58,7 +34,7 @@ origin:		UserRole???
 latitude:	float64 (double precision)
 longitude:	float64 (double precision)
 */
-func SendNewLocation(event model.Event, c *WebsocketClient) error {
+func (h *wsTaxiRequestHandler) SendNewLocation(event model.Event, c *WebsocketClient) error {
 	var location model.Location
 	if err := json.Unmarshal(event.Payload, &location); err != nil {
 		return fmt.Errorf("bad payload in event: %v", err)
@@ -90,16 +66,35 @@ Status update is sent to the customer.
 Event should include fields (may be appended in future):
 status: string
 */
-func SendTaxiRequestUpdate(event model.Event, c *WebsocketClient) error {
-	var reqUpdate model.TaxiRequest
-	if err := json.Unmarshal(event.Payload, &reqUpdate); err != nil {
+func (h *wsTaxiRequestHandler) SendTaxiRequestUpdate(event model.Event, c *WebsocketClient) error {
+
+	var rUpd model.TaxiRequest
+	if err := json.Unmarshal(event.Payload, &rUpd); err != nil {
 		return fmt.Errorf("bad payload in event: %v", err)
+	}
+
+	// Update db
+	_, err := h.taxiUsecase.UpdateRequest(rUpd.TaxiRequestId, rUpd.CustomerId, rUpd.DriverId, rUpd.DepartureId, rUpd.DestinationId, rUpd.Price, rUpd.Status)
+	if err != nil {
+		return fmt.Errorf("failed to update request: %v", err)
+	}
+
+	switch rUpd.Status {
+	// Driver accepted the taxi request
+	case model.WaitingForDriver:
+		c.setWsClientType(model.DriverCurrentTaxiRequestInfo)
+		c.setRequestId(rUpd.TaxiRequestId)
+	// Driver met Customer
+	case model.InProgress:
+	// Driver reached the destination with Customer
+	case model.Completed:
+		defer c.manager.removeClient(c)
 	}
 
 	// Create an event for user to receive
 	var outEvent model.Event
 	outEvent.Type = model.EventTaxiRequestUpdate
-	data, err := json.Marshal(outEvent)
+	data, err := json.Marshal(rUpd)
 	if err != nil {
 		log.Printf("failed to marshal request info: %v", err)
 		return err
@@ -110,6 +105,59 @@ func SendTaxiRequestUpdate(event model.Event, c *WebsocketClient) error {
 	for client := range c.manager.clients {
 		if client.requestId == c.requestId && !(client.user.Role == c.user.Role && client.user.UserId == c.user.UserId) {
 			client.egress <- outEvent
+		}
+	}
+
+	return nil
+}
+
+func (h *wsTaxiRequestHandler) CancelTaxiRequest(event model.Event, c *WebsocketClient) error {
+	defer c.manager.removeClient(c)
+
+	request, err := h.taxiUsecase.GetRequestById(c.requestId)
+	if err != nil {
+		return err
+	}
+
+	sendMessageFlag := false
+
+	// The cancellation is coming from customer (can be done only when FindingDriver or WaitingForDriver)
+	if c.user.Role == model.CustomerRole && (request.Status == model.FindingDriver || request.Status == model.WaitingForDriver) {
+		request.SetStatus(model.Canceled)
+		if request.DriverId != 0 {
+			sendMessageFlag = true
+		}
+	}
+
+	// The cancellation is coming from driver (can be done only when WaitingForDriver)
+	if c.user.Role == model.DriverRole && request.Status == model.WaitingForDriver {
+		sendMessageFlag = true
+		request.SetStatus(model.FindingDriver)
+		request.SetDriverId(0)
+	}
+
+	// update db
+	_, err = h.taxiUsecase.UpdateRequest(request.TaxiRequestId, request.CustomerId, request.DriverId, request.DepartureId, request.DestinationId, request.Price, request.Status)
+	if err != nil {
+		return fmt.Errorf("failed to update request: %v", err)
+	}
+
+	// Send the cancellation information to the relevant client
+	if sendMessageFlag {
+		var outEvent model.Event
+		outEvent.Type = model.EventTaxiRequestUpdate
+		data, err := json.Marshal(request)
+		if err != nil {
+			log.Printf("failed to marshal request info: %v", err)
+			return err
+		}
+		outEvent.Payload = data
+
+		for client := range c.manager.clients {
+			if client.requestId == c.requestId && !(client.user.Role == c.user.Role && client.user.UserId == c.user.UserId) {
+				client.egress <- outEvent
+				break
+			}
 		}
 	}
 

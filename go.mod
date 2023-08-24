@@ -31,7 +31,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.9 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
-	go.mongodb.org/mongo-driver v1.11.4 // indirect
+	go.mongodb.org/mongo-driver v1.12.1 // indirect
 	golang.org/x/arch v0.4.0 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
