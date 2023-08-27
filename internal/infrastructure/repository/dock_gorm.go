@@ -20,12 +20,12 @@ func NewDockRepository(db *gorm.DB) usecase.DockRepository {
 }
 
 // CreateDock implements usecase.DockRepository.
-func (repo *dockRepository) CreateDock(dock *model.Dock) error {
-	err := repo.db.Clauses(clause.Returning{}).Table(dockTableName).Select("name", "latitude", "longitude").Create(&dock).Error
+func (repo *dockRepository) CreateDock(dock *model.Dock) (int, error) {
+	err := repo.db.Clauses(clause.Returning{}).Table(dockTableName).Select("name", "active", "latitude", "longitude").Create(&dock).Error
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return dock.DockId, nil
 }
 
 // GetDockById implements usecase.DockRepository.

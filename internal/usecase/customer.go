@@ -15,7 +15,7 @@ type Customer interface {
 type CustomerRepository interface {
 	GetAllCustomers() ([]model.Customer, error)
 	GetCustomerByID(ID int) (*model.Customer, error)
-	CreateCustomer(*model.Customer) error
+	CreateCustomer(*model.Customer) (int, error)
 	UpdateCustomer(*model.Customer) error
 	DeleteCustomer(ID int) (*model.Customer, error)
 }
@@ -46,10 +46,12 @@ func (c *customerUsecase) GetCustomerByID(ID int) (*model.Customer, error) {
 
 func (c *customerUsecase) CreateCustomer(phone string, fName string, lName string) (*model.Customer, error) {
 	customer := model.CreateCustomer(0, phone, fName, lName)
-	err := c.customerRepository.CreateCustomer(&customer)
+	id, err := c.customerRepository.CreateCustomer(&customer)
 	if err != nil {
 		return nil, err
 	}
+
+	customer.SetCustomerId(id)
 	return &customer, nil
 }
 

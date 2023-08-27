@@ -12,7 +12,7 @@ type DockRepository interface {
 	GetDockById(id int) (*model.Dock, error)
 	GetDocks() ([]model.Dock, error)
 
-	CreateDock(*model.Dock) error
+	CreateDock(*model.Dock) (int, error)
 }
 
 type dockUsecase struct {
@@ -28,10 +28,12 @@ func NewDockUsecase(d DockRepository) Dock {
 // CreateDock implements Dock.
 func (use *dockUsecase) CreateDock(name string, latitude float64, longitude float64) (*model.Dock, error) {
 	dock := model.CreateDock(0, name, true, latitude, longitude)
-	err := use.dockRepo.CreateDock(&dock)
+	id, err := use.dockRepo.CreateDock(&dock)
 	if err != nil {
 		return nil, err
 	}
+
+	dock.SetDockId(id)
 	return &dock, nil
 }
 

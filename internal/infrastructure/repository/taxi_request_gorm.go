@@ -1,10 +1,6 @@
 package repository
 
 import (
-	// "log"
-
-	"log"
-
 	"github.com/Risminator/gog-taxi-golang/internal/domain/model"
 	"github.com/Risminator/gog-taxi-golang/internal/usecase"
 	"gorm.io/gorm"
@@ -40,8 +36,6 @@ func (repo *taxiRequestRepository) CreateRequest(r *model.TaxiRequest) (int, err
 	if err != nil {
 		return 0, err
 	}
-
-	log.Println(request)
 
 	return int(request["taxi_request_id"].(int32)), nil
 }

@@ -40,13 +40,13 @@ func (dr *driverRepository) GetDriverByID(ID int) (*model.Driver, error) {
 	return &driver, nil
 }
 
-func (dr *driverRepository) CreateDriver(driver *model.Driver) error {
+func (dr *driverRepository) CreateDriver(driver *model.Driver) (int, error) {
 	err := dr.db.Table(driverTableName).Select("first_name", "last_name", "vessel_id", "status", "balance", "cert_first_aid", "cert_driving").Create(driver).Error
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return driver.DriverId, nil
 }
 
 func (dr *driverRepository) UpdateDriver(driver *model.Driver) error {

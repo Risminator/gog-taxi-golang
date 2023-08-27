@@ -40,13 +40,13 @@ func (cr *customerRepository) GetCustomerByID(ID int) (*model.Customer, error) {
 	return &customer, nil
 }
 
-func (cr *customerRepository) CreateCustomer(customer *model.Customer) error {
+func (cr *customerRepository) CreateCustomer(customer *model.Customer) (int, error) {
 	err := cr.db.Table(customerTableName).Select("phone", "first_name", "last_name").Create(customer).Error
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return customer.CustomerId, nil
 }
 
 func (cr *customerRepository) UpdateCustomer(customer *model.Customer) error {

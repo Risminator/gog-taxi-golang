@@ -10,6 +10,7 @@ import (
 
 type dockInput struct {
 	Name      string  `json:"name" binding:"required"`
+	Active    bool    `json:"active" binding:"required"`
 	Latitude  float64 `json:"latitude" binding:"required"`
 	Longitude float64 `json:"longitude" binding:"required"`
 }
@@ -21,7 +22,7 @@ func registerDockRoutes(r *gin.RouterGroup, du usecase.Dock) {
 	{
 		h.GET("/", routes.getDocks)
 		h.GET("/:id", routes.getDockById)
-		h.POST("/add", routes.createDock)
+		h.POST("/", routes.createDock)
 	}
 }
 

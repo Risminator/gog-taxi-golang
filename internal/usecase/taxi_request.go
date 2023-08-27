@@ -31,8 +31,7 @@ func (use *taxiRequestUsecase) CreateRequest(reqId int, clId int, drId int, depI
 		return nil, err
 	}
 
-	// FIX!!!!!!!!!!!!
-	req.TaxiRequestId = id
+	req.SetTaxiRequestId(id)
 	return &req, nil
 }
 
