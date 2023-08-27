@@ -13,7 +13,7 @@ func (v *Vessel) CreateVessel(vesselId int, model string, seats int, isAppr bool
 	return Vessel{vesselId, model, seats, isAppr, lat, lon}
 }
 
-func (v *Vessel) SetId(id int) {
+func (v *Vessel) SetVesselId(id int) {
 	v.VesselId = id
 }
 

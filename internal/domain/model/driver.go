@@ -48,7 +48,7 @@ func CreateDriver(id int, firstName string, lastName string, vesselId int, statu
 	return Driver{id, firstName, lastName, vesselId, status, balance, certFA, certD}
 }
 
-func (d *Driver) SetId(id int) {
+func (d *Driver) SetDriverId(id int) {
 	d.DriverId = id
 }
 
