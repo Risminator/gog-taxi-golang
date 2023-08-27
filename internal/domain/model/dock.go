@@ -12,6 +12,10 @@ func CreateDock(id int, name string, active bool, lat float64, lon float64) Dock
 	return Dock{id, name, active, lat, lon}
 }
 
+func (d *Dock) SetId(id int) {
+	d.DockId = id
+}
+
 func (d *Dock) SetName(n string) {
 	d.Name = n
 }

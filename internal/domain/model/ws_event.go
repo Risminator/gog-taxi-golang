@@ -24,11 +24,11 @@ const (
 	/*
 		EventTaxiRequestUpdate is sent from frontend for backend to transfer updated request parameters
 		Expected Payload:
-			"taxi_request_id":	int
-			"customer_id":		int
-			"driver_id":		int
-			"departure_id":		int
-			"destination_id":	int
+			"taxiRequestId":	int
+			"customerId":		int
+			"driverId":			int
+			"departureId":		int
+			"destinationId":	int
 			"price":			double
 			"status":			string
 	*/

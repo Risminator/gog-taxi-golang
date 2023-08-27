@@ -47,6 +47,10 @@ func CreateTaxiRequest(reqId, clId, drId, depId, destId int, price float64) Taxi
 	return TaxiRequest{reqId, clId, drId, depId, destId, price, FindingDriver}
 }
 
+func (r *TaxiRequest) SetId(t int) {
+	r.TaxiRequestId = t
+}
+
 func (r *TaxiRequest) SetCustomerId(c int) {
 	r.CustomerId = c
 }

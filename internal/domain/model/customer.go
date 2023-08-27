@@ -11,6 +11,10 @@ func CreateCustomer(id int, phone string, firstName string, lastName string) Cus
 	return Customer{id, phone, firstName, lastName}
 }
 
+func (c *Customer) SetId(id int) {
+	c.CustomerId = id
+}
+
 func (c *Customer) SetPhone(p string) {
 	c.Phone = p
 }
