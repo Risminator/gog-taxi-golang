@@ -17,6 +17,23 @@ func NewTaxiRequestRepository(db *gorm.DB) usecase.TaxiRequestRepository {
 	return &taxiRequestRepository{db}
 }
 
+// GetRequestByUserId implements usecase.TaxiRequestRepository.
+func (repo *taxiRequestRepository) GetRequestByUserId(id int, role model.UserRole) (*model.TaxiRequest, error) {
+	request := &model.TaxiRequest{}
+	var err error
+
+	if role == model.CustomerRole {
+		err = repo.db.Table(taxiRequestTableName).Find(&request, "status != ? and status != ? and customer_id = ?", model.Canceled, model.Completed, id).Error
+	} else {
+		err = repo.db.Table(taxiRequestTableName).Find(&request, "status != ? and status != ? and driver_id = ?", model.Canceled, model.Completed, id).Error
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return request, nil
+}
+
 // CreateRequest implements usecase.TaxiRequestRepository.
 func (repo *taxiRequestRepository) CreateRequest(r *model.TaxiRequest) (int, error) {
 	request := map[string]interface{}{
@@ -74,7 +91,7 @@ func (repo *taxiRequestRepository) UpdateRequest(r *model.TaxiRequest) error {
 		request["driver_id"] = nil
 	}
 
-	err := repo.db.Clauses(clause.Returning{}).Table(taxiRequestTableName).Updates(&request).Error
+	err := repo.db.Clauses(clause.Returning{}).Table(taxiRequestTableName).Where("taxi_request_id = ?", r.TaxiRequestId).Updates(&request).Error
 	if err != nil {
 		return err
 	}

@@ -114,7 +114,7 @@ func (c *WebsocketClient) readMessages(manager *WebsocketManager) {
 // pongHandler is used to handle PongMessages for the Client
 func (c *WebsocketClient) pongHandler(pongMsg string) error {
 	// Current time + Pong Wait time
-	log.Println("pong")
+	// log.Println("pong")
 	return c.connection.SetReadDeadline(time.Now().Add(pongWait))
 }
 
@@ -153,7 +153,7 @@ func (c *WebsocketClient) writeMessages(manager *WebsocketManager) {
 			}
 			log.Println("sent message")
 		case <-ticker.C:
-			log.Println("ping")
+			// log.Println("ping")
 			// Send the Ping
 			if err := c.connection.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
 				log.Println("writemsg: ", err)

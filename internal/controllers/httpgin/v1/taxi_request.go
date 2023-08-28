@@ -31,7 +31,28 @@ func registerTaxiRequestRoutes(r *gin.RouterGroup, taxiUsecase usecase.TaxiReque
 		h.POST("/", routes.createRequest)
 		h.GET("/stream-order-status/:requestId", routes.streamOrderStatus)
 		h.GET("/stream-order-offer/:driverId", routes.streamOrderOffer)
+		h.GET("/user/:id", routes.getRequestByUserId)
 	}
+}
+
+func (r *taxiRequestRoutes) getRequestByUserId(c *gin.Context) {
+	userId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	role, err := model.UserRoleFromString(c.Query("role"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	msg, err := r.taxiUsecase.GetRequestByUserId(userId, role)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, *msg)
 }
 
 func (r *taxiRequestRoutes) getRequestById(c *gin.Context) {
@@ -87,6 +108,11 @@ func (r *taxiRequestRoutes) streamOrderStatus(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
+	role, err := model.UserRoleFromString(c.Query("role"))
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
 
 	req, err := r.taxiUsecase.GetRequestById(id)
 	if err != nil {
@@ -94,9 +120,20 @@ func (r *taxiRequestRoutes) streamOrderStatus(c *gin.Context) {
 		return
 	}
 
-	r.taxiWebsockets.ConnectWebsocket(c.Writer, c.Request, req.CustomerId, model.CustomerRole, model.CustomerCurrentTaxiRequestInfo, req.TaxiRequestId, nil)
+	var userId int
+	var wsClientType model.WebsocketClientType
+	if role == model.DriverRole {
+		userId = req.DriverId
+		wsClientType = model.DriverCurrentTaxiRequestInfo
+	} else {
+		userId = req.CustomerId
+		wsClientType = model.CustomerCurrentTaxiRequestInfo
+	}
+
+	r.taxiWebsockets.ConnectWebsocket(c.Writer, c.Request, userId, role, wsClientType, req.TaxiRequestId, nil)
 }
 
+// ws://localhost/taxi-request/websocket/:requestId?role=driver
 func (r *taxiRequestRoutes) streamOrderOffer(c *gin.Context) {
 	driverId, err := strconv.Atoi(c.Param("driverId"))
 	if err != nil {
