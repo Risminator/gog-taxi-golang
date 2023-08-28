@@ -53,7 +53,7 @@ func (h *wsTaxiRequestHandler) SendNewLocation(event model.Event, c *WebsocketCl
 	// Send location to relevant users (need to find a client knowing user)
 	// !!!!!!!!!!! HOW TO COMPARE USERS?
 	for client := range c.manager.clients {
-		if client.requestId == c.requestId && !(client.user.Role == c.user.Role && client.user.UserId == c.user.UserId) {
+		if client.requestId == c.requestId && c != client {
 			client.egress <- outEvent
 			break
 		}
@@ -104,7 +104,7 @@ func (h *wsTaxiRequestHandler) SendTaxiRequestUpdate(event model.Event, c *Webso
 
 	// Send updated taxi request to relevant customer
 	for client := range c.manager.clients {
-		if client.requestId == c.requestId && !(client.user.Role == c.user.Role && client.user.UserId == c.user.UserId) {
+		if client.requestId == c.requestId && c != client {
 			client.egress <- outEvent
 			break
 		}
@@ -156,7 +156,7 @@ func (h *wsTaxiRequestHandler) CancelTaxiRequest(event model.Event, c *Websocket
 		outEvent.Payload = data
 
 		for client := range c.manager.clients {
-			if client.requestId == c.requestId && !(client.user.Role == c.user.Role && client.user.UserId == c.user.UserId) {
+			if client.requestId == c.requestId && c != client {
 				client.egress <- outEvent
 				break
 			}

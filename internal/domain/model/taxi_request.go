@@ -5,7 +5,7 @@ import (
 )
 
 type TaxiRequest struct {
-	TaxiRequestId int               `json:"requestId" gorm:"primaryKey"`
+	TaxiRequestId int               `json:"taxiRequestId" gorm:"primaryKey"`
 	CustomerId    int               `json:"customerId"`
 	DriverId      int               `json:"driverId"`
 	DepartureId   int               `json:"departureId"`

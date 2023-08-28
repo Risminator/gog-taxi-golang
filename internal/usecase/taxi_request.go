@@ -5,12 +5,14 @@ import "github.com/Risminator/gog-taxi-golang/internal/domain/model"
 type TaxiRequest interface {
 	GetRequestsByStatus(status model.TaxiRequestStatus) ([]model.TaxiRequest, error)
 	GetRequestById(id int) (*model.TaxiRequest, error)
+	GetRequestByUserId(id int, role model.UserRole) (*model.TaxiRequest, error)
 	CreateRequest(reqId, clId, drId, depId, destId int, price float64) (*model.TaxiRequest, error)
 	UpdateRequest(reqId int, clId int, drId int, depId int, destId int, price float64, status model.TaxiRequestStatus) (*model.TaxiRequest, error)
 }
 type TaxiRequestRepository interface {
 	GetRequestsByStatus(status model.TaxiRequestStatus) ([]model.TaxiRequest, error)
 	GetRequestById(id int) (*model.TaxiRequest, error)
+	GetRequestByUserId(id int, role model.UserRole) (*model.TaxiRequest, error)
 	CreateRequest(r *model.TaxiRequest) (int, error)
 	UpdateRequest(request *model.TaxiRequest) error
 }
@@ -21,6 +23,16 @@ type taxiRequestUsecase struct {
 
 func NewTaxiRequestUsecase(requestRepo TaxiRequestRepository) TaxiRequest {
 	return &taxiRequestUsecase{requestRepo}
+}
+
+// GetRequestByUserId implements TaxiRequest.
+func (use *taxiRequestUsecase) GetRequestByUserId(id int, role model.UserRole) (*model.TaxiRequest, error) {
+	req, err := use.requestRepo.GetRequestByUserId(id, role)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
 }
 
 // CreateRequest implements TaxiRequest.
