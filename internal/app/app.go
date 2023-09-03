@@ -15,6 +15,7 @@ import (
 	v1 "github.com/Risminator/gog-taxi-golang/internal/controllers/httpgin/v1"
 	"github.com/Risminator/gog-taxi-golang/internal/infrastructure/datastore"
 	"github.com/Risminator/gog-taxi-golang/internal/infrastructure/repository"
+	"github.com/Risminator/gog-taxi-golang/internal/infrastructure/webapi"
 	"github.com/Risminator/gog-taxi-golang/internal/infrastructure/websockets"
 	"github.com/Risminator/gog-taxi-golang/internal/usecase"
 	"github.com/gin-gonic/gin"
@@ -25,7 +26,7 @@ const (
 	httpPort = ":18080"
 )
 
-func NewHTTPServer(port string, hu usecase.Hello, cu usecase.Customer, du usecase.Dock, dru usecase.Driver, ru usecase.TaxiRequest, rws v1.TaxiRequestWsGateway) *http.Server {
+func NewHTTPServer(port string, hu usecase.Hello, cu usecase.Customer, du usecase.Dock, dru usecase.Driver, ru usecase.TaxiRequest, rws v1.TaxiRequestWsGateway, routeUsecase usecase.Route) *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 
 	// Initialize handler with logger and recovery
@@ -38,7 +39,7 @@ func NewHTTPServer(port string, hu usecase.Hello, cu usecase.Customer, du usecas
 	api := handler.Group("/api")
 	{
 		v0.NewRouter(api, hu)
-		v1.NewRouter(api, cu, du, dru, ru, rws)
+		v1.NewRouter(api, cu, du, dru, ru, rws, routeUsecase)
 	}
 
 	s := &http.Server{Addr: port, Handler: handler}
@@ -62,10 +63,13 @@ func CreateServer(ctx context.Context, ch chan int) *http.Server {
 	rr := repository.NewTaxiRequestRepository(db)
 	ru := usecase.NewTaxiRequestUsecase(rr)
 
+	rbWebApi := webapi.NewRouterBrouter()
+	routeUsecase := usecase.NewRouteUsecase(rbWebApi)
+
 	wsManager := websockets.NewManager(ctx)
 	rws := websockets.NewWsTaxiRequestHandler(wsManager, ru)
 
-	httpServer := NewHTTPServer(httpPort, hu, cu, du, dru, ru, rws)
+	httpServer := NewHTTPServer(httpPort, hu, cu, du, dru, ru, rws, routeUsecase)
 	eg, ctx := errgroup.WithContext(ctx)
 
 	// Signals capture and graceful shutdown

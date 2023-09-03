@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -52,7 +53,11 @@ func (r *taxiRequestRoutes) getRequestByUserId(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, *msg)
+	if msg.TaxiRequestId == 0 {
+		c.AbortWithError(http.StatusNotFound, errors.New("No active taxi request for user"))
+	} else {
+		c.JSON(http.StatusOK, *msg)
+	}
 }
 
 func (r *taxiRequestRoutes) getRequestById(c *gin.Context) {

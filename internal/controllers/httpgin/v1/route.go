@@ -14,7 +14,7 @@ type routeInfoRoutes struct {
 	routeUsecase usecase.Route
 }
 
-func RegisterRouteInfoRoutes(r *gin.RouterGroup, ru usecase.Route) {
+func registerRouteInfoRoutes(r *gin.RouterGroup, ru usecase.Route) {
 	routes := &routeInfoRoutes{ru}
 
 	h := r.Group("route")

@@ -27,7 +27,7 @@ func (*routerBrouter) GetRouteInfo(start model.Location, end model.Location) (*g
 
 	q := req.URL.Query()
 	q.Add("lonlats", fmt.Sprintf("%g,%g|%g,%g", start.Longitude, start.Latitude, end.Longitude, end.Latitude))
-	q.Add("profile", "river")
+	q.Add("profile", "waterway_nomod")
 	q.Add("format", "geojson")
 	q.Add("alternativeidx", "0")
 	queryURL := strings.Replace(q.Encode(), "%2C", ",", -1)
