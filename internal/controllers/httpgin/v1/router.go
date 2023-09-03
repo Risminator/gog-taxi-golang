@@ -5,12 +5,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(handler *gin.RouterGroup, cu usecase.Customer, du usecase.Dock, dru usecase.Driver, ru usecase.TaxiRequest, rws TaxiRequestWsGateway) {
+func NewRouter(handler *gin.RouterGroup, cu usecase.Customer, du usecase.Dock, dru usecase.Driver, ru usecase.TaxiRequest, rws TaxiRequestWsGateway, routeUsecase usecase.Route) {
 	h := handler.Group("v1")
 	{
 		registerCustomerRoutes(h, cu)
 		registerDockRoutes(h, du)
 		registerDriverRoutes(h, dru)
 		registerTaxiRequestRoutes(h, ru, rws)
+		registerRouteInfoRoutes(h, routeUsecase)
 	}
 }
