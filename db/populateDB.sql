@@ -1,7 +1,7 @@
 insert into gog_demo.dock (name, active, latitude, longitude) values 
-('Dock1', true, 55.7538337, 37.6211812),
-('Dock2', true, 55.750934, 37.6235352),
-('Dock3', false, 55.7533247, 37.6233312);
+('Dock1', true, 59.92549, 30.38959),
+('Dock2', true, 59.9425, 30.40474),
+('Dock3', false, 59.95356, 30.34985);
 
 insert into gog_demo.vessel (model, seats, is_approved, latitude, longitude) values 
 ('Duck', 4, true, 55.123456, 37.1234567),
