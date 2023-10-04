@@ -38,6 +38,7 @@ func (r *dockRoutes) getDocks(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, msg)
 }
+
 func (r *dockRoutes) getDockById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -52,6 +53,7 @@ func (r *dockRoutes) getDockById(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, *msg)
 }
+
 func (r *dockRoutes) createDock(c *gin.Context) {
 	var body dockInput
 	if err := c.BindJSON(&body); err != nil {
