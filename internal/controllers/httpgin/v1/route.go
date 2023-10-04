@@ -38,6 +38,7 @@ func parseLocationStr(str string) *model.Location {
 		Longitude: lon,
 	}
 }
+
 func (r *routeInfoRoutes) getRouteInfo(c *gin.Context) {
 	lonlatsArr := strings.Split(c.Query("lonlats"), "|")
 
