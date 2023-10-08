@@ -60,6 +60,44 @@ ALTER TYPE gog_demo.taxi_request_status OWNER TO postgres;
 CREATE CAST (character varying AS gog_demo.taxi_request_status) WITH INOUT AS IMPLICIT;
 
 
+--
+-- Name: calculate_distance(double precision, double precision, double precision, double precision); Type: FUNCTION; Schema: gog_demo; Owner: postgres
+--
+
+CREATE FUNCTION gog_demo.calculate_distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) RETURNS double precision
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+        dist double precision = 0;
+        radlat1 double precision;
+        radlat2 double precision;
+        theta double precision;
+        radtheta double precision;
+    BEGIN
+        IF lat1 = lat2 AND lon1 = lon2
+            THEN RETURN dist;
+        ELSE
+            radlat1 = pi() * lat1 / 180;
+            radlat2 = pi() * lat2 / 180;
+            theta = lon1 - lon2;
+            radtheta = pi() * theta / 180;
+            dist = sin(radlat1) * sin(radlat2) + cos(radlat1) * cos(radlat2) * cos(radtheta);
+
+            IF dist > 1 THEN dist = 1; END IF;
+
+            dist = acos(dist);
+            dist = dist * 180 / pi();
+            dist = dist * 60 * 1.1515;
+            dist = dist * 1.609344;
+
+            RETURN dist;
+        END IF;
+    END;
+$$;
+
+
+ALTER FUNCTION gog_demo.calculate_distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
