@@ -22,6 +22,7 @@ func registerDockRoutes(r *gin.RouterGroup, du usecase.Dock) {
 	{
 		h.GET("/", routes.getDocks)
 		h.GET("/:id", routes.getDockById)
+		h.GET("/nearest", routes.getNearestDocks)
 		h.POST("/", routes.createDock)
 	}
 }
@@ -52,6 +53,35 @@ func (r *dockRoutes) getDockById(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, *msg)
+}
+
+func (r *dockRoutes) getNearestDocks(c *gin.Context) {
+	lat, err := strconv.ParseFloat(c.Query("latitude"), 64)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	lon, err := strconv.ParseFloat(c.Query("longitude"), 64)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	count := 1
+	if query := c.Query("count"); query != "" {
+		count, err = strconv.Atoi(query)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	msg, err := r.du.GetNearestDocks(lat, lon, count)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, msg)
 }
 
 func (r *dockRoutes) createDock(c *gin.Context) {

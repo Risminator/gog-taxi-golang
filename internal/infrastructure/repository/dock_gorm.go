@@ -47,3 +47,14 @@ func (repo *dockRepository) GetDocks() ([]model.Dock, error) {
 	}
 	return docks, nil
 }
+
+func (repo *dockRepository) GetNearestDocks(lat float64, lon float64, count int) ([]model.Dock, error) {
+	var docks []model.Dock
+	err := repo.db.Raw(
+		"SELECT * FROM gog_demo.dock ORDER BY gog_demo.calculate_distance(latitude, longitude, ?, ?) LIMIT ?", lat, lon, count).
+		Scan(&docks).Error
+	if err != nil {
+		return nil, err
+	}
+	return docks, nil
+}

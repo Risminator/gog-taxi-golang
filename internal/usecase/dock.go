@@ -5,12 +5,14 @@ import "github.com/Risminator/gog-taxi-golang/internal/domain/model"
 type Dock interface {
 	GetDockById(id int) (*model.Dock, error)
 	GetDocks() ([]model.Dock, error)
+	GetNearestDocks(lat float64, lon float64, count int) ([]model.Dock, error)
 
 	CreateDock(name string, latitude float64, longitude float64) (*model.Dock, error)
 }
 type DockRepository interface {
 	GetDockById(id int) (*model.Dock, error)
 	GetDocks() ([]model.Dock, error)
+	GetNearestDocks(lat float64, lon float64, count int) ([]model.Dock, error)
 
 	CreateDock(*model.Dock) (int, error)
 }
@@ -49,6 +51,14 @@ func (use *dockUsecase) GetDockById(id int) (*model.Dock, error) {
 // GetDocks implements Dock.
 func (use *dockUsecase) GetDocks() ([]model.Dock, error) {
 	docks, err := use.dockRepo.GetDocks()
+	if err != nil {
+		return nil, err
+	}
+	return docks, nil
+}
+
+func (use *dockUsecase) GetNearestDocks(lat float64, lon float64, count int) ([]model.Dock, error) {
+	docks, err := use.dockRepo.GetNearestDocks(lat, lon, count)
 	if err != nil {
 		return nil, err
 	}
