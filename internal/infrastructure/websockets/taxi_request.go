@@ -12,12 +12,13 @@ import (
 )
 
 type wsTaxiRequestHandler struct {
-	wsManager   *WebsocketManager
-	taxiUsecase usecase.TaxiRequest
+	wsManager     *WebsocketManager
+	taxiUsecase   usecase.TaxiRequest
+	vesselUsecase usecase.Vessel
 }
 
-func NewWsTaxiRequestHandler(wsManager *WebsocketManager, taxiUsecase usecase.TaxiRequest) v1.TaxiRequestWsGateway {
-	h := wsTaxiRequestHandler{wsManager, taxiUsecase}
+func NewWsTaxiRequestHandler(wsManager *WebsocketManager, taxiUsecase usecase.TaxiRequest, vesselUsecase usecase.Vessel) v1.TaxiRequestWsGateway {
+	h := wsTaxiRequestHandler{wsManager, taxiUsecase, vesselUsecase}
 
 	h.wsManager.handlers[model.EventSendLocationUpdate] = h.SendNewLocation
 	h.wsManager.handlers[model.EventSendTaxiRequestUpdate] = h.SendTaxiRequestUpdate
@@ -39,6 +40,14 @@ func (h *wsTaxiRequestHandler) SendNewLocation(event model.Event, c *WebsocketCl
 	if err := json.Unmarshal(event.Payload, &location); err != nil {
 		return fmt.Errorf("bad payload in event: %v", err)
 	}
+
+	// Update DB
+	vessel, err := h.vesselUsecase.GetVesselByRequestId(c.requestId)
+	if err != nil {
+		log.Printf("failed to get vessel info: %v", err)
+		return err
+	}
+	h.vesselUsecase.UpdateLocation(vessel.VesselId, location.Latitude, location.Longitude)
 
 	// Create an event for user to receive
 	var outEvent model.Event

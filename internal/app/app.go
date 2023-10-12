@@ -26,7 +26,9 @@ const (
 	httpPort = ":18080"
 )
 
-func NewHTTPServer(port string, hu usecase.Hello, cu usecase.Customer, du usecase.Dock, dru usecase.Driver, ru usecase.TaxiRequest, rws v1.TaxiRequestWsGateway, routeUsecase usecase.Route) *http.Server {
+func NewHTTPServer(port string, hu usecase.Hello, cu usecase.Customer, du usecase.Dock,
+								dru usecase.Driver, vu usecase.Vessel, ru usecase.TaxiRequest,
+								rws v1.TaxiRequestWsGateway, routeUsecase usecase.Route) *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 
 	// Initialize handler with logger and recovery
@@ -39,7 +41,7 @@ func NewHTTPServer(port string, hu usecase.Hello, cu usecase.Customer, du usecas
 	api := handler.Group("/api")
 	{
 		v0.NewRouter(api, hu)
-		v1.NewRouter(api, cu, du, dru, ru, rws, routeUsecase)
+		v1.NewRouter(api, cu, du, dru, vu, ru, rws, routeUsecase)
 	}
 
 	s := &http.Server{Addr: port, Handler: handler}
@@ -60,6 +62,9 @@ func CreateServer(ctx context.Context, ch chan int) *http.Server {
 	drr := repository.NewDriverRepository(db)
 	dru := usecase.NewDriverUsecase(drr)
 
+	vr := repository.NewVesselRepository(db)
+	vu := usecase.NewVesselUsecase(vr)
+
 	rr := repository.NewTaxiRequestRepository(db)
 	ru := usecase.NewTaxiRequestUsecase(rr)
 
@@ -67,9 +72,9 @@ func CreateServer(ctx context.Context, ch chan int) *http.Server {
 	routeUsecase := usecase.NewRouteUsecase(rbWebApi)
 
 	wsManager := websockets.NewManager(ctx)
-	rws := websockets.NewWsTaxiRequestHandler(wsManager, ru)
+	rws := websockets.NewWsTaxiRequestHandler(wsManager, ru, vu)
 
-	httpServer := NewHTTPServer(httpPort, hu, cu, du, dru, ru, rws, routeUsecase)
+	httpServer := NewHTTPServer(httpPort, hu, cu, du, dru, vu, ru, rws, routeUsecase)
 	eg, ctx := errgroup.WithContext(ctx)
 
 	// Signals capture and graceful shutdown
