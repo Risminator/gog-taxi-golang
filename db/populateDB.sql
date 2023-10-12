@@ -67,9 +67,9 @@ insert into gog_demo.dock (name, active, latitude, longitude) values
 ('Point 67', true, 30.2675539, 59.9539091);
 
 insert into gog_demo.vessel (model, seats, is_approved, latitude, longitude) values 
-('Duck', 4, true, 55.123456, 37.1234567),
-('Swan', 3, true, 55.123456, 37.1234567),
-('Fish', 4, true, 55.123456, 37.1234567);
+('Duck', 4, true, 30.3551579, 59.9529771),
+('Swan', 5, true, 30.3075201, 59.9443755),
+('Fish', 4, true, 30.2931345, 59.9341729);
 
 insert into gog_demo.driver (first_name, last_name, vessel_id, status, balance, cert_first_aid, cert_driving) values
 ('George', 'Boole', 1, 'waiting', 512, 1, 1),
