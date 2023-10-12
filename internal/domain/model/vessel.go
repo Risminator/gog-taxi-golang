@@ -9,7 +9,7 @@ type Vessel struct {
 	Longitude  float64 `json:"longitude"`
 }
 
-func (v *Vessel) CreateVessel(vesselId int, model string, seats int, isAppr bool, lat float64, lon float64) Vessel {
+func CreateVessel(vesselId int, model string, seats int, isAppr bool, lat float64, lon float64) Vessel {
 	return Vessel{vesselId, model, seats, isAppr, lat, lon}
 }
 
