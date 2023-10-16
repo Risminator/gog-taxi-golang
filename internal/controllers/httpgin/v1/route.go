@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -40,12 +41,18 @@ func parseLocationStr(str string) *model.Location {
 }
 
 func (r *routeInfoRoutes) getRouteInfo(c *gin.Context) {
+	profile := c.Query("profile")
+	if profile == "" {
+		c.AbortWithError(http.StatusBadRequest, errors.New("Profile parameter required"))
+		return
+	}
+
 	lonlatsArr := strings.Split(c.Query("lonlats"), "|")
 
 	start := parseLocationStr(lonlatsArr[0])
 	end := parseLocationStr(lonlatsArr[1])
 
-	feature, err := r.routeUsecase.GetRouteInfo(*start, *end)
+	feature, err := r.routeUsecase.GetRouteInfo(*start, *end, profile)
 
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
