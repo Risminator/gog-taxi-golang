@@ -84,7 +84,7 @@ func (h *wsTaxiRequestHandler) SendTaxiRequestUpdate(event model.Event, c *Webso
 	}
 
 	// Update db
-	_, err := h.taxiUsecase.UpdateRequest(rUpd.TaxiRequestId, rUpd.CustomerId, rUpd.DriverId, rUpd.DepartureId, rUpd.DestinationId, rUpd.Price, rUpd.Status)
+	_, err := h.taxiUsecase.UpdateRequest(rUpd.TaxiRequestId, rUpd.CustomerId, rUpd.DriverId, rUpd.DepartureId, rUpd.DestinationId, rUpd.DepartureLongitude, rUpd.DepartureLatitude, rUpd.DestinationLongitude, rUpd.DestinationLatitude, rUpd.Price, rUpd.Status)
 	if err != nil {
 		return fmt.Errorf("failed to update request: %v", err)
 	}
@@ -148,7 +148,7 @@ func (h *wsTaxiRequestHandler) CancelTaxiRequest(event model.Event, c *Websocket
 	}
 
 	// update db
-	_, err = h.taxiUsecase.UpdateRequest(request.TaxiRequestId, request.CustomerId, request.DriverId, request.DepartureId, request.DestinationId, request.Price, request.Status)
+	_, err = h.taxiUsecase.UpdateRequest(request.TaxiRequestId, request.CustomerId, request.DriverId, request.DepartureId, request.DestinationId, request.DepartureLongitude, request.DepartureLatitude, request.DestinationLongitude, request.DestinationLatitude, request.Price, request.Status)
 	if err != nil {
 		return fmt.Errorf("failed to update request: %v", err)
 	}

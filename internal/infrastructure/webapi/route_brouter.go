@@ -19,7 +19,7 @@ func NewRouterBrouter() usecase.RouteWebApi {
 }
 
 // GetRouteInfo implements usecase.RouteWebApi.
-func (*routerBrouter) GetRouteInfo(start model.Location, end model.Location) (*geojson.FeatureCollection, error) {
+func (*routerBrouter) GetRouteInfo(start model.Location, end model.Location, profile string) (*geojson.FeatureCollection, error) {
 	req, err := http.NewRequest("GET", "http://localhost:17777/brouter", nil)
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func (*routerBrouter) GetRouteInfo(start model.Location, end model.Location) (*g
 
 	q := req.URL.Query()
 	q.Add("lonlats", fmt.Sprintf("%g,%g|%g,%g", start.Longitude, start.Latitude, end.Longitude, end.Latitude))
-	q.Add("profile", "waterway_nomod")
+	q.Add("profile", profile)
 	q.Add("format", "geojson")
 	q.Add("alternativeidx", "0")
 	queryURL := strings.Replace(q.Encode(), "%2C", ",", -1)

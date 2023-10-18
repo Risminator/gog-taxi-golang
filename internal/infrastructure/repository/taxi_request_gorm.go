@@ -37,12 +37,16 @@ func (repo *taxiRequestRepository) GetRequestByUserId(id int, role model.UserRol
 // CreateRequest implements usecase.TaxiRequestRepository.
 func (repo *taxiRequestRepository) CreateRequest(r *model.TaxiRequest) (int, error) {
 	request := map[string]interface{}{
-		"customer_id":    r.CustomerId,
-		"driver_id":      r.DriverId,
-		"departure_id":   r.DepartureId,
-		"destination_id": r.DestinationId,
-		"price":          r.Price,
-		"status":         r.Status,
+		"customer_id":           r.CustomerId,
+		"driver_id":             r.DriverId,
+		"departure_id":          r.DepartureId,
+		"destination_id":        r.DestinationId,
+		"departure_longitude":   r.DepartureLongitude,
+		"departure_latitude":    r.DepartureLatitude,
+		"destination_longitude": r.DestinationLongitude,
+		"destination_latitude":  r.DestinationLatitude,
+		"price":                 r.Price,
+		"status":                r.Status,
 	}
 
 	if r.DriverId == 0 {
@@ -79,12 +83,16 @@ func (repo *taxiRequestRepository) GetRequestsByStatus(status model.TaxiRequestS
 
 func (repo *taxiRequestRepository) UpdateRequest(r *model.TaxiRequest) error {
 	request := map[string]interface{}{
-		"customer_id":    r.CustomerId,
-		"driver_id":      r.DriverId,
-		"departure_id":   r.DepartureId,
-		"destination_id": r.DestinationId,
-		"price":          r.Price,
-		"status":         r.Status,
+		"customer_id":           r.CustomerId,
+		"driver_id":             r.DriverId,
+		"departure_id":          r.DepartureId,
+		"destination_id":        r.DestinationId,
+		"departure_longitude":   r.DepartureLongitude,
+		"departure_latitude":    r.DepartureLatitude,
+		"destination_longitude": r.DestinationLongitude,
+		"destination_latitude":  r.DestinationLatitude,
+		"price":                 r.Price,
+		"status":                r.Status,
 	}
 
 	if r.DriverId == 0 {

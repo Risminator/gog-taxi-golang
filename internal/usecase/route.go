@@ -6,10 +6,10 @@ import (
 )
 
 type Route interface {
-	GetRouteInfo(start model.Location, end model.Location) (*geojson.FeatureCollection, error)
+	GetRouteInfo(start model.Location, end model.Location, profile string) (*geojson.FeatureCollection, error)
 }
 type RouteWebApi interface {
-	GetRouteInfo(start model.Location, end model.Location) (*geojson.FeatureCollection, error)
+	GetRouteInfo(start model.Location, end model.Location, profile string) (*geojson.FeatureCollection, error)
 }
 
 type routeUsecase struct {
@@ -21,8 +21,8 @@ func NewRouteUsecase(webApi RouteWebApi) Route {
 }
 
 // GetRouteInfo implements Route.
-func (ru *routeUsecase) GetRouteInfo(start model.Location, end model.Location) (*geojson.FeatureCollection, error) {
-	feature, err := ru.webApi.GetRouteInfo(start, end)
+func (ru *routeUsecase) GetRouteInfo(start model.Location, end model.Location, profile string) (*geojson.FeatureCollection, error) {
+	feature, err := ru.webApi.GetRouteInfo(start, end, profile)
 	if err != nil {
 		return nil, err
 	}

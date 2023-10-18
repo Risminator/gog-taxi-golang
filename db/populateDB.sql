@@ -1,4 +1,4 @@
-insert into gog_demo.dock (name, active, latitude, longitude) values 
+insert into gog_demo.dock (name, active, longitude, latitude) values 
 ('Point 1', true, 30.3551579, 59.9529771),
 ('Point 2', true, 30.3075201, 59.9443755),
 ('Point 3', true, 30.2931345, 59.9341729),
@@ -77,4 +77,4 @@ insert into gog_demo.driver (first_name, last_name, vessel_id, status, balance, 
 ('Alan', 'Remedy', 3, 'waiting', 1024, 1, 1);
 
 insert into gog_demo.customer (phone, first_name, last_name) values
-('12345', 'Yan', 'Oreshko')
+('12345', 'Yan', 'Oreshko');
