@@ -45,6 +45,7 @@ ALTER TYPE gog_demo.driver_status OWNER TO postgres;
 CREATE TYPE gog_demo.taxi_request_status AS ENUM (
     'findingDriver',
     'waitingForDriver',
+    'waitingForCustomer',
     'inProgress',
     'completed',
     'canceled'
@@ -225,6 +226,10 @@ CREATE TABLE gog_demo.taxi_request (
     driver_id integer,
     departure_id integer,
     destination_id integer,
+    departure_longitude double precision NOT NULL,
+    departure_latitude double precision NOT NULL,
+    destination_longitude double precision NOT NULL,
+    destination_latitude double precision NOT NULL,
     price numeric(19,4) NOT NULL,
     status gog_demo.taxi_request_status NOT NULL
 );

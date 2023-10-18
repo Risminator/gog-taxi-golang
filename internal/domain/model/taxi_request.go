@@ -5,13 +5,17 @@ import (
 )
 
 type TaxiRequest struct {
-	TaxiRequestId int               `json:"taxiRequestId" gorm:"primaryKey"`
-	CustomerId    int               `json:"customerId"`
-	DriverId      int               `json:"driverId"`
-	DepartureId   int               `json:"departureId"`
-	DestinationId int               `json:"destinationId"`
-	Price         float64           `json:"price"`
-	Status        TaxiRequestStatus `json:"status"`
+	TaxiRequestId        int               `json:"taxiRequestId" gorm:"primaryKey"`
+	CustomerId           int               `json:"customerId"`
+	DriverId             int               `json:"driverId"`
+	DepartureId          int               `json:"departureId"`
+	DestinationId        int               `json:"destinationId"`
+	DepartureLongitude   float64           `json:"departureLongitude"`
+	DepartureLatitude    float64           `json:"departureLatitude"`
+	DestinationLongitude float64           `json:"destinationLongitude"`
+	DestinationLatitude  float64           `json:"destinationLatitude"`
+	Price                float64           `json:"price"`
+	Status               TaxiRequestStatus `json:"status"`
 }
 
 type TaxiRequestStatus string
@@ -20,6 +24,7 @@ const (
 	UnknownTaxiRequestStatus TaxiRequestStatus = ""
 	FindingDriver            TaxiRequestStatus = "findingDriver"
 	WaitingForDriver         TaxiRequestStatus = "waitingForDriver"
+	WaitingForCustomer       TaxiRequestStatus = "waitingForCustomer"
 	InProgress               TaxiRequestStatus = "inProgress"
 	Completed                TaxiRequestStatus = "completed"
 	Canceled                 TaxiRequestStatus = "canceled"
@@ -43,8 +48,8 @@ func TaxiRequestStatusFromString(s string) (TaxiRequestStatus, error) {
 }
 
 // Automatically set to FindingDriver when creating an order
-func CreateTaxiRequest(reqId, clId, drId, depId, destId int, price float64) TaxiRequest {
-	return TaxiRequest{reqId, clId, drId, depId, destId, price, FindingDriver}
+func CreateTaxiRequest(reqId, clId, drId, depId, destId int, departureLon, departureLat, destinationLon, destinationLat, price float64) TaxiRequest {
+	return TaxiRequest{reqId, clId, drId, depId, destId, departureLon, departureLat, destinationLon, destinationLat, price, FindingDriver}
 }
 
 func (r *TaxiRequest) SetTaxiRequestId(t int) {

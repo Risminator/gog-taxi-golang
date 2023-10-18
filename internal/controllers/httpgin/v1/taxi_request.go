@@ -97,7 +97,7 @@ func (r *taxiRequestRoutes) createRequest(c *gin.Context) {
 		return
 	}
 
-	req, err := r.taxiUsecase.CreateRequest(body.TaxiRequestId, body.CustomerId, body.DriverId, body.DepartureId, body.DestinationId, body.Price)
+	req, err := r.taxiUsecase.CreateRequest(body.TaxiRequestId, body.CustomerId, body.DriverId, body.DepartureId, body.DestinationId, body.DepartureLongitude, body.DepartureLatitude, body.DestinationLongitude, body.DestinationLatitude, body.Price)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
