@@ -47,6 +47,7 @@ func (repo *taxiRequestRepository) CreateRequest(r *model.TaxiRequest) (int, err
 		"destination_latitude":  r.DestinationLatitude,
 		"price":                 r.Price,
 		"status":                r.Status,
+		"planned_time":          r.PlannedTime,
 	}
 
 	if r.DriverId == 0 {
