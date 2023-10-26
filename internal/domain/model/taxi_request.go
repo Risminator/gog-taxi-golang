@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"time"
 )
 
 type TaxiRequest struct {
@@ -15,6 +16,7 @@ type TaxiRequest struct {
 	DestinationLongitude float64           `json:"destinationLongitude"`
 	DestinationLatitude  float64           `json:"destinationLatitude"`
 	Price                float64           `json:"price"`
+	PlannedTime          *time.Time        `json:"plannedTime"`
 	Status               TaxiRequestStatus `json:"status"`
 }
 
@@ -48,8 +50,8 @@ func TaxiRequestStatusFromString(s string) (TaxiRequestStatus, error) {
 }
 
 // Automatically set to FindingDriver when creating an order
-func CreateTaxiRequest(reqId, clId, drId, depId, destId int, departureLon, departureLat, destinationLon, destinationLat, price float64) TaxiRequest {
-	return TaxiRequest{reqId, clId, drId, depId, destId, departureLon, departureLat, destinationLon, destinationLat, price, FindingDriver}
+func CreateTaxiRequest(reqId, clId, drId, depId, destId int, departureLon, departureLat, destinationLon, destinationLat, price float64, plannedTime *time.Time) TaxiRequest {
+	return TaxiRequest{reqId, clId, drId, depId, destId, departureLon, departureLat, destinationLon, destinationLat, price, plannedTime, FindingDriver}
 }
 
 func (r *TaxiRequest) SetTaxiRequestId(t int) {

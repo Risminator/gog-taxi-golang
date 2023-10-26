@@ -231,6 +231,7 @@ CREATE TABLE gog_demo.taxi_request (
     destination_longitude double precision NOT NULL,
     destination_latitude double precision NOT NULL,
     price numeric(19,4) NOT NULL,
+    planned_time timestamp,
     status gog_demo.taxi_request_status NOT NULL
 );
 

@@ -1,12 +1,16 @@
 package usecase
 
-import "github.com/Risminator/gog-taxi-golang/internal/domain/model"
+import (
+	"time"
+
+	"github.com/Risminator/gog-taxi-golang/internal/domain/model"
+)
 
 type TaxiRequest interface {
 	GetRequestsByStatus(status model.TaxiRequestStatus) ([]model.TaxiRequest, error)
 	GetRequestById(id int) (*model.TaxiRequest, error)
 	GetRequestByUserId(id int, role model.UserRole) (*model.TaxiRequest, error)
-	CreateRequest(reqId int, clId int, drId int, depId int, destId int, departureLon, departureLat, destinationLon, destinationLat, price float64) (*model.TaxiRequest, error)
+	CreateRequest(reqId int, clId int, drId int, depId int, destId int, departureLon, departureLat, destinationLon, destinationLat, price float64, plannedTime *time.Time) (*model.TaxiRequest, error)
 	UpdateRequest(reqId int, clId int, drId int, depId int, destId int, departureLon, departureLat, destinationLon, destinationLat, price float64, status model.TaxiRequestStatus) (*model.TaxiRequest, error)
 }
 type TaxiRequestRepository interface {
@@ -36,8 +40,8 @@ func (use *taxiRequestUsecase) GetRequestByUserId(id int, role model.UserRole) (
 }
 
 // CreateRequest implements TaxiRequest.
-func (use *taxiRequestUsecase) CreateRequest(reqId int, clId int, drId int, depId int, destId int, departureLon, departureLat, destinationLon, destinationLat, price float64) (*model.TaxiRequest, error) {
-	req := model.CreateTaxiRequest(reqId, clId, drId, depId, destId, departureLon, departureLat, destinationLon, destinationLat, price)
+func (use *taxiRequestUsecase) CreateRequest(reqId int, clId int, drId int, depId int, destId int, departureLon, departureLat, destinationLon, destinationLat, price float64, plannedTime *time.Time) (*model.TaxiRequest, error) {
+	req := model.CreateTaxiRequest(reqId, clId, drId, depId, destId, departureLon, departureLat, destinationLon, destinationLat, price, plannedTime)
 	id, err := use.requestRepo.CreateRequest(&req)
 	if err != nil {
 		return nil, err
