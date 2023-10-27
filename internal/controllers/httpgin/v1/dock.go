@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Risminator/gog-taxi-golang/internal/domain/model"
 	"github.com/Risminator/gog-taxi-golang/internal/usecase"
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +25,7 @@ func registerDockRoutes(r *gin.RouterGroup, du usecase.Dock) {
 		h.GET("/:id", routes.getDockById)
 		h.GET("/nearest", routes.getNearestDocks)
 		h.POST("/", routes.createDock)
+		h.PUT("/", routes.updateDock)
 	}
 }
 
@@ -92,6 +94,21 @@ func (r *dockRoutes) createDock(c *gin.Context) {
 	}
 
 	msg, err := r.du.CreateDock(body.Name, body.Latitude, body.Longitude)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, msg)
+}
+
+func (r *dockRoutes) updateDock(c *gin.Context) {
+	var body model.Dock
+	if err := c.BindJSON(&body); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	msg, err := r.du.UpdateDock(body.DockId, body.Name, body.Latitude, body.Longitude)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return

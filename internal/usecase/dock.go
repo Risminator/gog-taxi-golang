@@ -8,6 +8,7 @@ type Dock interface {
 	GetNearestDocks(lat float64, lon float64, count int) ([]model.Dock, error)
 
 	CreateDock(name string, latitude float64, longitude float64) (*model.Dock, error)
+	UpdateDock(dockId int, name string, latitude, longitude float64) (*model.Dock, error)
 }
 type DockRepository interface {
 	GetDockById(id int) (*model.Dock, error)
@@ -15,6 +16,7 @@ type DockRepository interface {
 	GetNearestDocks(lat float64, lon float64, count int) ([]model.Dock, error)
 
 	CreateDock(*model.Dock) (int, error)
+	UpdateDock(*model.Dock) error
 }
 
 type dockUsecase struct {
@@ -25,6 +27,23 @@ func NewDockUsecase(d DockRepository) Dock {
 	return &dockUsecase{
 		dockRepo: d,
 	}
+}
+
+// UpdateDock implements Dock.
+func (use *dockUsecase) UpdateDock(dockId int, name string, latitude float64, longitude float64) (*model.Dock, error) {
+	dock, err := use.GetDockById(dockId)
+	if err != nil {
+		return nil, err
+	}
+	dock.SetName(name)
+	dock.SetLatitude(latitude)
+	dock.SetLongitude(longitude)
+
+	err = use.dockRepo.UpdateDock(dock)
+	if err != nil {
+		return nil, err
+	}
+	return dock, nil
 }
 
 // CreateDock implements Dock.
