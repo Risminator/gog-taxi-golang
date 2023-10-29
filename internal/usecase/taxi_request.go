@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/Risminator/gog-taxi-golang/internal/domain/model"
@@ -23,10 +24,11 @@ type TaxiRequestRepository interface {
 
 type taxiRequestUsecase struct {
 	requestRepo TaxiRequestRepository
+	routeWebApi RouteWebApi
 }
 
-func NewTaxiRequestUsecase(requestRepo TaxiRequestRepository) TaxiRequest {
-	return &taxiRequestUsecase{requestRepo}
+func NewTaxiRequestUsecase(requestRepo TaxiRequestRepository, routeWebApi RouteWebApi) TaxiRequest {
+	return &taxiRequestUsecase{requestRepo, routeWebApi}
 }
 
 // GetRequestByUserId implements TaxiRequest.
@@ -41,6 +43,17 @@ func (use *taxiRequestUsecase) GetRequestByUserId(id int, role model.UserRole) (
 
 // CreateRequest implements TaxiRequest.
 func (use *taxiRequestUsecase) CreateRequest(reqId int, clId int, drId int, depId int, destId int, departureLon, departureLat, destinationLon, destinationLat, price float64, plannedTime *time.Time) (*model.TaxiRequest, error) {
+	geo, err := use.routeWebApi.GetRouteInfo(model.Location{Latitude: departureLat, Longitude: departureLon}, model.Location{Latitude: destinationLat, Longitude: destinationLon}, "river")
+	if err != nil {
+		return nil, err
+	}
+	trackLength, err := strconv.ParseFloat(geo.Features[0].Properties["track-length"].(string), 64)
+	if err != nil {
+		return nil, err
+	}
+
+	price = (230 + 206 + ((trackLength/1000)/30)*3000) * 1.18
+
 	req := model.CreateTaxiRequest(reqId, clId, drId, depId, destId, departureLon, departureLat, destinationLon, destinationLat, price, plannedTime)
 	id, err := use.requestRepo.CreateRequest(&req)
 	if err != nil {
