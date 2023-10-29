@@ -27,8 +27,8 @@ const (
 )
 
 func NewHTTPServer(port string, hu usecase.Hello, cu usecase.Customer, du usecase.Dock,
-								dru usecase.Driver, vu usecase.Vessel, ru usecase.TaxiRequest,
-								rws v1.TaxiRequestWsGateway, routeUsecase usecase.Route) *http.Server {
+	dru usecase.Driver, vu usecase.Vessel, ru usecase.TaxiRequest,
+	rws v1.TaxiRequestWsGateway, routeUsecase usecase.Route) *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 
 	// Initialize handler with logger and recovery
@@ -65,11 +65,11 @@ func CreateServer(ctx context.Context, ch chan int) *http.Server {
 	vr := repository.NewVesselRepository(db)
 	vu := usecase.NewVesselUsecase(vr)
 
-	rr := repository.NewTaxiRequestRepository(db)
-	ru := usecase.NewTaxiRequestUsecase(rr)
-
 	rbWebApi := webapi.NewRouterBrouter()
 	routeUsecase := usecase.NewRouteUsecase(rbWebApi)
+
+	rr := repository.NewTaxiRequestRepository(db)
+	ru := usecase.NewTaxiRequestUsecase(rr, rbWebApi)
 
 	wsManager := websockets.NewManager(ctx)
 	rws := websockets.NewWsTaxiRequestHandler(wsManager, ru, vu)
